@@ -4,6 +4,7 @@ import com.example.di.manual.repository.UserLocalDataSource
 import com.example.di.manual.repository.UserRemoteDataSource
 import com.example.di.manual.repository.UserRepository
 import com.example.di.manual.service.LoginService
+import com.example.di.manual.viewmodel.LoginViewModelFactory
 import retrofit2.Retrofit
 
 /**
@@ -16,6 +17,7 @@ class AppContainer {
         .create(LoginService::class.java)
     private val remoteDataSource = UserRemoteDataSource(retrofit)
     private val localDataSource = UserLocalDataSource()
-    val userRepository = UserRepository(localDataSource, remoteDataSource)
-
+    // 容器管理
+    private val userRepository = UserRepository(localDataSource, remoteDataSource)
+    val loginViewModelFactory = LoginViewModelFactory(userRepository)
 }
