@@ -48,8 +48,7 @@ class ManualLoginActivity : AppCompatActivity() {
     private fun doLogin2() {
         // 使用容器的方式userRepository只初始化一次，类似单例而不是单例模式。
         val myApplication = application as MyApplication
-        myApplication.container.loginContainer =
-            LoginContainer(myApplication.container.userRepository)
+        myApplication.container.loginContainer = LoginContainer(myApplication.container.userRepository)
         val loginViewModel = myApplication.container.loginContainer!!.loginViewModelFactory.create()
         loginViewModel.login()
     }
