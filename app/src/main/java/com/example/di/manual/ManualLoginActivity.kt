@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import com.example.di.R
 import com.example.di.manual.application.MyApplication
+import com.example.di.manual.container.LoginContainer
 import com.example.di.manual.repository.UserLocalDataSource
 import com.example.di.manual.repository.UserRemoteDataSource
 import com.example.di.manual.repository.UserRepository
@@ -47,7 +48,9 @@ class ManualLoginActivity : AppCompatActivity() {
     private fun doLogin2() {
         // 使用容器的方式userRepository只初始化一次，类似单例而不是单例模式。
         val myApplication = application as MyApplication
-        val loginViewModel = myApplication.container.loginViewModelFactory.create()
+        myApplication.container.loginContainer =
+            LoginContainer(myApplication.container.userRepository)
+        val loginViewModel = myApplication.container.loginContainer!!.loginViewModelFactory.create()
         loginViewModel.login()
     }
 }

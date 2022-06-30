@@ -17,7 +17,8 @@ class AppContainer {
         .create(LoginService::class.java)
     private val remoteDataSource = UserRemoteDataSource(retrofit)
     private val localDataSource = UserLocalDataSource()
+
     // 容器管理
-    private val userRepository = UserRepository(localDataSource, remoteDataSource)
-    val loginViewModelFactory = LoginViewModelFactory(userRepository)
+    val userRepository = UserRepository(localDataSource, remoteDataSource)
+    var loginContainer: LoginContainer? = null
 }
