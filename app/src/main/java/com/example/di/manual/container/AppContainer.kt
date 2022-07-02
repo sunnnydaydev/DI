@@ -12,7 +12,7 @@ import retrofit2.Retrofit
  */
 class AppContainer {
     private val retrofit = Retrofit.Builder()
-        .baseUrl("https://www.baidu.com")
+        .baseUrl("https://www.baidu.com") // 测试使用，这里就当做访问后台登录接口了。
         .build()
         .create(LoginService::class.java)
     private val remoteDataSource = UserRemoteDataSource(retrofit)
