@@ -3,6 +3,7 @@ plugins {
     id 'org.jetbrains.kotlin.android'
     id 'org.jetbrains.kotlin.android.extensions'
 }
+apply plugin: 'kotlin-kapt'
 
 android {
     compileSdk 32
@@ -43,4 +44,6 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
     implementation "com.squareup.okhttp3:okhttp:4.9.3"//okHttp
     implementation 'com.squareup.retrofit2:retrofit:2.5.0'//retrofit
+    implementation 'com.google.dagger:dagger:2.38.1'
+    kapt 'com.google.dagger:dagger-compiler:2.38.1'
 }
