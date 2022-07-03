@@ -1,4 +1,4 @@
-# Dagger
+# Dagger基础
 
 可以大致回顾下"手动依赖注入"的步骤：
 
@@ -203,6 +203,8 @@ class UserRepository @Inject constructor(
 2、通过@Component注解一个接口则会生成一个容器，在容器中可直接定义具有依赖关系的类，容器自动创建对应实例。
 
 3、使用@Single可获取单例，当然我们也可以自定义这个注解。
+
+经过本章，了解下Dagger基础 ~
 
 
 
