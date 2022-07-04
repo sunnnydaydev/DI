@@ -4,6 +4,7 @@ import com.example.auto_di.net.service.LoginRetrofitService
 import dagger.Module
 import dagger.Provides
 import retrofit2.Retrofit
+import javax.inject.Singleton
 
 /**
  * Create by SunnyDay /07/03 20:39:57
@@ -13,6 +14,8 @@ import retrofit2.Retrofit
  */
 @Module
 class NetWorkModule {
+    //注意这里标记方法上，而不是Module上
+    @Singleton
     @Provides
     fun provideLoginRetrofitService(): LoginRetrofitService {
         return Retrofit.Builder()

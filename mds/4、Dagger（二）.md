@@ -101,6 +101,47 @@ class LoginActivity : AppCompatActivity() {
 }
 ```
 
+# 思考
+
+###### 1、上述@Provides注解标记的方法如何传参
+
+###### 2、上述LoginRetrofitService单例的实现
+
+很简单，容器添加注解，依赖类添加注解，对应方法添加注解即可。
+
+```kotlin
+@Singleton
+@Component(modules = [NetWorkModule::class])
+interface ApplicationComponent {
+    /**
+     * 为LoginActivity注入字段。
+     * */
+    fun inject(activity: LoginActivity)
+}
+```
+```kotlin
+data class UserRepository @Inject constructor(val userRemoteDataSource:UserRemoteDataSource)
+```
+
+```kotlin
+@Module
+class NetWorkModule {
+    //注意这里标记方法上，而不是Module上
+    @Singleton
+    @Provides
+    fun provideLoginRetrofitService(): LoginRetrofitService {
+        return Retrofit.Builder()
+            .baseUrl("https://www.baidu.com")
+            .build()
+            .create(LoginRetrofitService::class.java)
+    }
+}
+```
+
+
+
+
+
 
 
 

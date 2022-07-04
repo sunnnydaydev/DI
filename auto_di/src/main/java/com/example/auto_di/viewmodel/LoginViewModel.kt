@@ -14,15 +14,19 @@ import javax.inject.Inject
  */
 class LoginViewModel @Inject constructor(private val userRepository: UserRepository) {
 
-    fun login(){
-        userRepository.userRemoteDataSource.loginService.getLoginDataFromSever().enqueue(object :
+    fun login() {
+        val service = userRepository.userRemoteDataSource.loginService
+        val service2 = userRepository.userRemoteDataSource.loginService
+        Log.i("LoginViewModel", "service实例1：$service")
+        Log.i("LoginViewModel", "service实例2：$service2")
+        service.getLoginDataFromSever().enqueue(object :
             Callback<ResponseBody> {
             override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
-                Log.i("LoginViewModel","onResponse")
+                Log.i("LoginViewModel", "onResponse")
             }
 
             override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
-                Log.i("LoginViewModel","onFailure")
+                Log.i("LoginViewModel", "onFailure")
             }
 
         })
