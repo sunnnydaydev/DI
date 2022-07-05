@@ -2,20 +2,28 @@ package com.example.auto_di.ui
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import com.example.auto_di.R
+import com.example.auto_di.application.LoginComponent
 import com.example.auto_di.application.MyApplication
 import com.example.auto_di.viewmodel.LoginViewModel
 import javax.inject.Inject
 
 class LoginActivity : AppCompatActivity() {
-    //标记字段
+    // 生命周期跟随activity
+    lateinit var loginComponent: LoginComponent
     @Inject
     lateinit var loginViewModel: LoginViewModel
     override fun onCreate(savedInstanceState: Bundle?) {
-        // 初始化注入方法，原理很简单，把activity实例给Dagger，dagger则可以动态为activity对象成员赋值。
-        (application as MyApplication).component.inject(this@LoginActivity)
+
+        loginComponent = (application as MyApplication).component.loginComponent().create()
+        loginComponent.inject(this@LoginActivity)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
         loginViewModel.login()
+
+        val loginComponent2 = (application as MyApplication).component.loginComponent().create()
+        Log.i("tag","loginComponent：$loginComponent")
+        Log.i("tag","loginComponent2：$loginComponent2")
     }
 }
