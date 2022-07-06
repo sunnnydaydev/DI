@@ -10,6 +10,17 @@
 
 [5、Dagger（三）](./mds/5、Dagger（三）.md)
 
-todo：
 
-Dagger（四）：Dagger在多模块中使用
+todo： 登录案例：手动依赖注入下面重新整理
+
+1、直接总结下常用的注解用法
+
+- 如何通过构造构建依赖@Inject
+- 如何使用容器
+- 单例的实现、自定义单例
+- Module的概念、Provider Binds 用法
+
+2、登录案例：Dagger实现
+
+3、Dagger在多模块中使用
+

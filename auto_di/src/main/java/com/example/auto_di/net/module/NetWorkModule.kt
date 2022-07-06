@@ -23,4 +23,11 @@ class NetWorkModule {
             .build()
             .create(LoginRetrofitService::class.java)
     }
+
+
+    @Singleton
+    @Provides
+    fun test(name:String): String {
+        return ""
+    }
 }
