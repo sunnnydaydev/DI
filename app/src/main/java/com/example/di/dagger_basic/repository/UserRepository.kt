@@ -13,7 +13,7 @@ import javax.inject.Singleton
 class UserRepository @Inject constructor(
     val localDataSource: UserLocalDataSource,
     val remoteDataSource: UserRemoteDataSource
-) {}
+)
 
 class UserLocalDataSource @Inject constructor() {}
 
