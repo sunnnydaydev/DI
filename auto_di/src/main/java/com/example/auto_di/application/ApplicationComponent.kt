@@ -13,6 +13,4 @@ import javax.inject.Singleton
 @Component(modules = [NetWorkModule::class, SubcomponentsModule::class])
 interface ApplicationComponent {
     fun loginComponent(): LoginComponent.Factory
-
-    fun
 }
