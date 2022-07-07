@@ -168,7 +168,7 @@ public final class UserRepository_Factory implements Factory<UserRepository> {
          * */
 
 ```
-可见同样提供了两种方案来获取被生成类的实例。方式1还好说依赖我们手动new 参数传递。方式2就不那么又好了，需要被依赖的类也要使用@Inject注解下。
+可见同样提供了两种方案来获取被生成类的实例。方式1还好说依赖我们手动new 参数传递。方式2就不那么友好了，需要被依赖的类也要使用@Inject注解下。
 否则我们都无法传递Provider< T > 类型的参数。
 
 ###### 3、通过容器管理
@@ -179,7 +179,15 @@ public final class UserRepository_Factory implements Factory<UserRepository> {
 
 其实Dagger还提供了容器管理。还是老样子，再看一个例子。
 
-（1）
+（1）创建一个容器
+```kotlin
+@Component
+interface ApplicationComponent {
+}
+```
+很简单，定义个接口，然后使用@Component注解标注下即可。生成代码先不看了，和下面ð一起看喽！
+
+（2）让容器来管理依赖
 
 ###### 4、单例
 
