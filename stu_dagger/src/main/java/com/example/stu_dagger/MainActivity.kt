@@ -3,6 +3,8 @@ package com.example.stu_dagger
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import com.example.stu_dagger.components.ApplicationComponent
+import com.example.stu_dagger.components.DaggerApplicationComponent
 import com.example.stu_dagger.repo.*
 
 class MainActivity : AppCompatActivity() {
@@ -38,5 +40,12 @@ class MainActivity : AppCompatActivity() {
          * D/MainActivity: userRepository1:com.example.stu_dagger.repo.UserRepository@d4b9d50
          * D/MainActivity: userRepository2:com.example.stu_dagger.repo.UserRepository@f008b49
          * */
+
+        // 获取UserRepository实例
+        val userRepository:UserRepository = DaggerApplicationComponent.create().getUserRepository()
+        // 获取UserRepository的依赖项
+            userRepository.localDataSource
+            userRepository.remoteDataSource
+
     }
 }

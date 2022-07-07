@@ -31,8 +31,8 @@ app/build.gradle 添加下依赖
  * Create by SunnyDay /07/06 21:26:32
  */
 class UserRepository(
-    private val localDataSource: UserLocalDataSource,
-    private val remoteDataSource: UserRemoteDataSource
+     val localDataSource: UserLocalDataSource,
+     val remoteDataSource: UserRemoteDataSource
 )
 class UserLocalDataSource
 class UserRemoteDataSource
@@ -103,8 +103,8 @@ public final class UserRemoteDataSource_Factory implements Factory<UserRemoteDat
  * Create by SunnyDay /07/06 21:26:32
  */
 class UserRepository @Inject constructor(
-    private val localDataSource: UserLocalDataSource,
-    private val remoteDataSource: UserRemoteDataSource
+     val localDataSource: UserLocalDataSource,
+     val remoteDataSource: UserRemoteDataSource
 )
 ```
 
@@ -179,15 +179,79 @@ public final class UserRepository_Factory implements Factory<UserRepository> {
 
 其实Dagger还提供了容器管理。还是老样子，再看一个例子。
 
-（1）创建一个容器
+（1）容器创建&依赖管理
 ```kotlin
 @Component
 interface ApplicationComponent {
 }
 ```
-很简单，定义个接口，然后使用@Component注解标注下即可。生成代码先不看了，和下面ð一起看喽！
+容器的创建很简单，定义个接口，然后使用@Component注解标注下即可。 接下来看看如何使用容器来管理依赖的：
 
-（2）让容器来管理依赖
+```kotlin
+@Component
+interface ApplicationComponent {
+    fun getUserRepository():UserRepository
+}
+```
+好了，完事。这样容器就接手了具有依赖关系类的实例创建工作。 接下类看看如何使用了：
+
+```kotlin
+        // 获取UserRepository实例
+        val userRepository:UserRepository = DaggerApplicationComponent.create().getUserRepository()
+        // 获取UserRepository的依赖项
+            userRepository.localDataSource
+            userRepository.remoteDataSource
+```
+哈哈哈调用是不是贼简单。这里先知道：
+
+- DaggerApplicationComponent是ApplicationComponent接口的实现类即可。这也是系统生成的，并且系统提供 了如何获取DaggerApplicationComponent实例的方法
+- 生成类的名字也是有规律的：Dagger+接口名
+- 生成类采取Build模式获取
+
+具体就要看源码喽~
+
+（2）容器生成类是怎样的？
+```java
+@DaggerGenerated
+@SuppressWarnings({
+    "unchecked",
+    "rawtypes"
+})
+public final class DaggerApplicationComponent implements ApplicationComponent {
+  private final DaggerApplicationComponent applicationComponent = this;
+
+  private DaggerApplicationComponent() {
+
+
+  }
+
+  public static Builder builder() {
+    return new Builder();
+  }
+
+  public static ApplicationComponent create() {
+    return new Builder().build();
+  }
+
+  // 接口实现方法，并且自动实现。
+  @Override
+  public UserRepository getUserRepository() {
+    return new UserRepository(new UserLocalDataSource(), new UserRemoteDataSource());
+  }
+
+  public static final class Builder {
+    private Builder() {
+    }
+
+    public ApplicationComponent build() {
+      return new DaggerApplicationComponent();
+    }
+  }
+}
+```
+很简单:
+- 通过Build模式来创建生成类实例。因此直接DaggerApplicationComponent#create 或者 DaggerApplicationComponent#Builder#builder都能获取到生成类对象。
+- 生成类对象自动生成接口实现方法，并且自动实现。
 
 ###### 4、单例
 

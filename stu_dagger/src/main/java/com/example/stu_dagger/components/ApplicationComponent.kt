@@ -1,5 +1,6 @@
 package com.example.stu_dagger.components
 
+import com.example.stu_dagger.repo.UserRepository
 import dagger.Component
 
 /**
@@ -7,4 +8,5 @@ import dagger.Component
  */
 @Component
 interface ApplicationComponent {
+    fun getUserRepository():UserRepository
 }
