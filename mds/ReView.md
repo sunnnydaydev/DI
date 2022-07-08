@@ -253,5 +253,9 @@ public final class DaggerApplicationComponent implements ApplicationComponent {
 - 通过Build模式来创建生成类实例。因此直接DaggerApplicationComponent#create 或者 DaggerApplicationComponent#Builder#builder都能获取到生成类对象。
 - 生成类对象自动生成接口实现方法，并且自动实现。
 
+todo：
+
+容器图解，画一个图。来表示容器管理多组依赖关系。
+
 ###### 4、单例
 
