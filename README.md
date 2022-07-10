@@ -4,6 +4,8 @@
 
 [2、登录栗子手动依赖项注入.md](./mds/2、登录栗子手动依赖项注入.md)
 
+[3、Dagger基础.md](./mds/3、Dagger基础.md)
+
 [3、Dagger（一）](./mds/3、Dagger（一）.md)
 
 [4、Dagger（二）](./mds/4、Dagger（二）.md)

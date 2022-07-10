@@ -41,11 +41,40 @@ class MainActivity : AppCompatActivity() {
          * D/MainActivity: userRepository2:com.example.stu_dagger.repo.UserRepository@f008b49
          * */
 
-        // 获取UserRepository实例
-        val userRepository:UserRepository = DaggerApplicationComponent.create().getUserRepository()
-        // 获取UserRepository的依赖项
-            userRepository.localDataSource
-            userRepository.remoteDataSource
+        // DaggerApplicationComponent
+        val container1 = DaggerApplicationComponent.create()
+        val container2 = DaggerApplicationComponent.create()
+        //加上@Singleton后验证下DaggerApplicationComponent是否单例
+        Log.d(tag,"container1:$container1")
+        Log.d(tag,"container2:$container2")
+
+        /**
+        contain对象不同：
+        D/MainActivity: container1:com.example.stu_dagger.components.DaggerApplicationComponent@121bc4e
+        D/MainActivity: container2:com.example.stu_dagger.components.DaggerApplicationComponent@511216f
+         */
+
+        val userRepository3:UserRepository = container1.getUserRepository()
+        val userRepository4:UserRepository = container1.getUserRepository()
+        //加上@Singleton后验证下UserRepository获取是否单例。
+        Log.d(tag,"userRepository3:$userRepository3")
+        Log.d(tag,"userRepository4:$userRepository3")
+        /**
+        userRepository对象相同
+        D/MainActivity: userRepository3:com.example.stu_dagger.repo.UserRepository@b553e7c
+        D/MainActivity: userRepository3:com.example.stu_dagger.repo.UserRepository@b553e7c
+         * */
+
+        // DaggerApplicationComponent
+        val container3 = (application as MyApplication).appComponent
+        val container4 = (application as MyApplication).appComponent
+        //加上@Singleton后验证下DaggerApplicationComponent是否单例
+        Log.d(tag,"container3:$container3")
+        Log.d(tag,"container4:$container4")
+        /**
+        D/MainActivity: container3:com.example.stu_dagger.components.DaggerApplicationComponent@121bc4e
+        D/MainActivity: container3:com.example.stu_dagger.components.DaggerApplicationComponent@121bc4e
+         * */
 
     }
 }

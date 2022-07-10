@@ -233,7 +233,7 @@ public final class DaggerApplicationComponent implements ApplicationComponent {
     return new Builder().build();
   }
 
-  // 接口实现方法，并且自动实现。
+  // 接口实现方法，并且自动实现。每次调用都会new对象。
   @Override
   public UserRepository getUserRepository() {
     return new UserRepository(new UserLocalDataSource(), new UserRemoteDataSource());
@@ -249,13 +249,214 @@ public final class DaggerApplicationComponent implements ApplicationComponent {
   }
 }
 ```
-很简单:
+
 - 通过Build模式来创建生成类实例。因此直接DaggerApplicationComponent#create 或者 DaggerApplicationComponent#Builder#builder都能获取到生成类对象。
-- 生成类对象自动生成接口实现方法，并且自动实现。
+- 生成类中自动生成接口实现方法。
+- 很好理解容器就是管理具有依赖关系的对象创建的，只要吧具有依赖关系的对象放入容器中容器就自动管理。
+- 不过容器管理的对象默认情况下非单例的，默认情况下被管理的对象都是new出来的。
+- 容器本身也是非单例的。Build模式创建，一看就知道。
 
-todo：
+Dagger容器统一管理图解
 
-容器图解，画一个图。来表示容器管理多组依赖关系。
+![Login自动注入](https://gitee.com/sunnnydaydev/my-pictures/raw/master/github/di/DaggerContainer.png)
 
-###### 4、单例
+
+###### 4、容器内对象的单例
+
+容器管理的对象默认情况下是非单例的，想要让提供的对象单例可以使用@Singleton注解。
+
+```kotlin
+@Singleton
+@Component
+interface ApplicationComponent {
+    fun getUserRepository():UserRepository
+}
+
+@Singleton
+class UserRepository @Inject constructor(
+    val localDataSource: UserLocalDataSource,
+    val remoteDataSource: UserRemoteDataSource
+)
+```
+代码验证：
+
+```kotlin
+        // DaggerApplicationComponent
+        val container1 = DaggerApplicationComponent.create()
+        val container2 = DaggerApplicationComponent.create()
+        //加上@Singleton后验证下DaggerApplicationComponent是否单例
+        Log.d(tag,"container1:$container1")
+        Log.d(tag,"container2:$container2")
+        
+        /**
+        contain对象不同：
+        D/MainActivity: container1:com.example.stu_dagger.components.DaggerApplicationComponent@121bc4e
+        D/MainActivity: container2:com.example.stu_dagger.components.DaggerApplicationComponent@511216f
+         */
+
+        val userRepository3:UserRepository = container1.getUserRepository()
+        val userRepository4:UserRepository = container1.getUserRepository()
+        //加上@Singleton后验证下UserRepository获取是否单例。
+        Log.d(tag,"userRepository3:$userRepository3")
+        Log.d(tag,"userRepository4:$userRepository3")
+        /**
+        userRepository对象相同
+        D/MainActivity: userRepository3:com.example.stu_dagger.repo.UserRepository@b553e7c
+        D/MainActivity: userRepository3:com.example.stu_dagger.repo.UserRepository@b553e7c
+         * */
+```
+可见添加@Singleton注解后对容器本身是没作用的，并不会使容器单例。但是可以把容器管理的对象单例。
+
+通过代码和log可以得出上述结论。接下来还是看下生成的代码再印证下：
+
+```java
+@DaggerGenerated
+@SuppressWarnings({
+    "unchecked",
+    "rawtypes"
+})
+public final class DaggerApplicationComponent implements ApplicationComponent {
+  private final DaggerApplicationComponent applicationComponent = this;
+
+  private Provider<UserRepository> userRepositoryProvider;
+
+  private DaggerApplicationComponent() {
+    // 与不加单例的区别之处，这里多了个方法调用。
+    initialize();
+
+  }
+
+  public static Builder builder() {
+    return new Builder();
+  }
+
+  public static ApplicationComponent create() {
+    return new Builder().build();
+  }
+
+  @SuppressWarnings("unchecked")
+  private void initialize() {
+      // 采用dcl方式实现单例
+    this.userRepositoryProvider = DoubleCheck.provider(UserRepository_Factory.create(UserLocalDataSource_Factory.create(), UserRemoteDataSource_Factory.create()));
+  }
+
+  @Override
+  public UserRepository getUserRepository() {
+    return userRepositoryProvider.get();
+  }
+
+  public static final class Builder {
+    private Builder() {
+    }
+
+    public ApplicationComponent build() {
+      return new DaggerApplicationComponent();
+    }
+  }
+}
+```
+可见：
+
+- 添加@Singleton注解后对DaggerApplicationComponent本身对象的创建未做任何变化。
+- 接口中定义的方法获取相应对象时方式改变了，使用了单例模式的DCL方案。
+- 添加@Singleton注解后与未添加注解时生成的目标类代码一致。单例的处理是在容器类中处理的。
+
+去除UserRepository的@Singleton，给 UserRemoteDataSource添加@Singleton,看下面的变化点可印证："添加@Singleton注解后与未添加注解时生成的目标类代码一致。单例的处理是在容器类中处理的。"
+
+```java
+@DaggerGenerated
+@SuppressWarnings({
+        "unchecked",
+        "rawtypes"
+})
+public final class DaggerApplicationComponent implements ApplicationComponent {
+    private final DaggerApplicationComponent applicationComponent = this;
+
+    private Provider<UserRemoteDataSource> userRemoteDataSourceProvider;
+
+    private DaggerApplicationComponent() {
+
+        initialize();
+
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static ApplicationComponent create() {
+        return new Builder().build();
+    }
+
+    @SuppressWarnings("unchecked")
+    private void initialize() {
+        // 变化点
+        this.userRemoteDataSourceProvider = DoubleCheck.provider(UserRemoteDataSource_Factory.create());
+    }
+
+    @Override
+    public UserRepository getUserRepository() {
+        return new UserRepository(new UserLocalDataSource(), userRemoteDataSourceProvider.get());
+    }
+
+    public static final class Builder {
+        private Builder() {
+        }
+
+        public ApplicationComponent build() {
+            return new DaggerApplicationComponent();
+        }
+    }
+}
+```
+
+注意：单例也是建立在Dagger容器的管理下的。使用容器管理后我们不要随便创建相应的对象了，否则就打破单例了。
+
+###### 5、单例补充
+
+（1）容器的单例
+
+上面的例子我们或许也发现了@Singleton注解并不会使容器本身单例，那么我们如何使容器单例呢？通常我们首先想到的就是采用单例模式，但这里有一种更加
+快捷方便的方法，结合Application：
+
+```kotlin
+/**
+ * Create by SunnyDay /07/10 22:00:08
+ */
+class MyApplication :Application() {
+    val appComponent: ApplicationComponent = DaggerApplicationComponent.create()
+    override fun onCreate() {
+        super.onCreate()
+    }
+}
+```
+
+```kotlin
+        // DaggerApplicationComponent
+        val container3 = (application as MyApplication).appComponent
+        val container4 = (application as MyApplication).appComponent
+        //加上@Singleton后验证下DaggerApplicationComponent是否单例
+        Log.d(tag,"container3:$container3")
+        Log.d(tag,"container4:$container4")
+        /**
+        D/MainActivity: container3:com.example.stu_dagger.components.DaggerApplicationComponent@121bc4e
+        D/MainActivity: container3:com.example.stu_dagger.components.DaggerApplicationComponent@121bc4e
+         * */
+```
+
+（2）自定义容器内对象的生命周期
+
+我们可以使用作用域注解将某个对象的生命周期限定为其组件的生命周期。如上的@Singleton是系统提供的注解，当然我们也可以创建并使用自定义作用域注解
+
+```kotlin
+@Scope
+@MustBeDocumented
+@Retention(value = AnnotationRetention.RUNTIME)
+annotation class MyCustomScope
+```
+定义十分简单：核心是系统的@Scope注解，使用这个注解标记我们自定义注解即可。
+使用也很简单：给容器组件添加这个注解，然后给容器直接或者间接管理的目标类添加这个注解即可。
+
+
+
 
