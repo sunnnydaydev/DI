@@ -6,11 +6,8 @@
 
 [3、Dagger基础.md](./mds/3、Dagger基础.md)
 
-[3、Dagger（一）](./mds/3、Dagger（一）.md)
+[4、Dagger常见的注解.md](./mds/4、Dagger常见的注解.md)
 
-[4、Dagger（二）](./mds/4、Dagger（二）.md)
-
-[5、Dagger（三）](./mds/5、Dagger（三）.md)
 
 
 todo： 登录案例：手动依赖注入下面重新整理

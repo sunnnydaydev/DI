@@ -3,9 +3,7 @@
 在Dagger基础中认识了几个注解：@inject、@Component、@Singleton，本章节就总结下其他的常用的注解。
 
 - @Inject字段注入
-- @Provider告知 Dagger 如何提供您的项目所不具备的类。
 - @Module 模块的概念
-- @Binds 告知 Dagger 接口应采用哪种实现
 - @Subcomponent 子组件
 
 ###### 1、使用@Inject进行字段注入
@@ -157,3 +155,13 @@ public final class DaggerApplicationComponent implements ApplicationComponent {
 流程总结：
 
 ![Login自动注入](https://gitee.com/sunnnydaydev/my-pictures/raw/master/github/di/flow.png)
+
+留个小疑问？
+
+- MainActivity_MembersInjector生成类是不是有点鸡肋，注入动作在容器生成类中都可自动完成？
+- MainActivity_MembersInjector只用了静态调用的方式，create的方案就没使用？
+
+###### 2、Module相关
+
+- @Provider：@Provider告知 Dagger 如何提供您的项目所不具备的类。
+- @Binds：告知 Dagger 接口应采用哪种实现
