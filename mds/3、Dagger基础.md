@@ -17,6 +17,7 @@ app/build.gradle 添加下依赖
 
 ![Login自动注入](https://gitee.com/sunnnydaydev/my-pictures/raw/master/github/di/userrepo.png)
 
+本文主要以这三个类为例子：
 
 - UserRepository是数据仓库管理类，负责管理UserLocalDataSource和UserRemoteDataSource
 

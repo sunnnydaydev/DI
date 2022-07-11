@@ -1,5 +1,6 @@
 package com.example.stu_dagger.components
 
+import com.example.stu_dagger.MainActivity
 import com.example.stu_dagger.repo.UserRepository
 import dagger.Component
 import javax.inject.Singleton
@@ -11,4 +12,6 @@ import javax.inject.Singleton
 @Component
 interface ApplicationComponent {
     fun getUserRepository():UserRepository
+
+    fun inject(activity:MainActivity)
 }
