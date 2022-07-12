@@ -8,18 +8,13 @@
 
 [4、Dagger常见的注解.md](./mds/4、Dagger常见的注解.md)
 
+[5、Dagger子组件.md](./mds/5、Dagger子组件.md)
+
+[6、Dagger作用于总结.md](./mds/6、Dagger作用于总结.md)
+
 
 
 todo： 登录案例：手动依赖注入下面重新整理
-
-标题为Dagger（一） 这种形式
-
-1、直接总结下常用的注解用法
-
-- 如何通过构造构建依赖@Inject
-- 如何使用容器
-- 单例的实现、自定义单例
-- Module的概念、Provider Binds 用法
 
 2、登录案例：Dagger实现
 

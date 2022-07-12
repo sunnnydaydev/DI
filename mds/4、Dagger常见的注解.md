@@ -316,6 +316,52 @@ class MainActivity : AppCompatActivity() {
 //  I/LoginPresenter: onResponse
 ```
 
+此时有一个需求来了，我需要可配置OkhttpClient，那provideLoginRetrofitService就需要接收一个参数了：
+
+```kotlin
+    @Provides
+    fun provideLoginRetrofitService(client: OkHttpClient): ApiService {
+        return Retrofit.Builder()
+            .baseUrl("https://www.baidu.com")
+            .client(client)
+            .build()
+            .create(ApiService::class.java)
+
+    }
+```
+
+不出意外这样跑起来肯定报错，因为Dagger容器又不知道client这个参数去那里找了，跑来看看:okhttp3.OkHttpClient cannot be provided without an @Inject constructor or an @Provides-annotated method.
+看到这我们想必心里有答案了，报错和前面一样。两种方式可解决。
+
+- 使用@Inject注解目标类的构造，这里若是普通类还行，但OkHttpClient还是不行，虽然可以通过new的方式创建，但是我们无法去源码中加注解。
+- 使用@Provides提供一下即可。
+
+```kotlin
+@Module
+class NetWorkModules {
+    /**
+     * 提供Retrofit实例
+     * */
+    @Provides
+    fun provideLoginRetrofitService(client: OkHttpClient): ApiService {
+        return Retrofit.Builder()
+            .baseUrl("https://www.baidu.com")
+            .client(client)
+            .build()
+            .create(ApiService::class.java)
+
+    }
+    @Provides
+    fun providerOkhttpClient():OkHttpClient{
+        return OkHttpClient()
+        // return OkHttpClient.Builder().build() // 这样也可
+    }
+}
+```
+
+这样就完美跑起来了。
+
+（2）@Binds
 
 
 
