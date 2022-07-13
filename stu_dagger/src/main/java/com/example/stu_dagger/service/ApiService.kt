@@ -10,4 +10,7 @@ import retrofit2.http.GET
 interface ApiService {
     @GET("/")
     fun getLoginDataFromSever(): Call<ResponseBody>
+
+    @GET("/")
+    fun logOutFromSever(): Call<ResponseBody>
 }

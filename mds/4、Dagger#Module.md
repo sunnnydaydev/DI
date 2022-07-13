@@ -1,10 +1,7 @@
-# Dagger常见的注解
+# Dagger@Inject字段注入与Dagger#Module
 
-在Dagger基础中认识了几个注解：@inject、@Component、@Singleton，本章节就总结下其他的常用的注解。
-
-- @Inject字段注入
+- @Inject 进行字段注入
 - @Module 模块的概念
-- @Subcomponent 子组件
 
 ###### 1、使用@Inject进行字段注入
 
@@ -163,13 +160,11 @@ public final class DaggerApplicationComponent implements ApplicationComponent {
 - MainActivity_MembersInjector生成类是不是有点鸡肋，注入动作在容器生成类中都可自动完成？
 - MainActivity_MembersInjector只用了静态调用的方式，create的方案就没使用？
 
-###### 2、Module相关
+###### 2、Module相关@Provider
 
 - @Provider：告知 Dagger 如何提供您的项目所不具备的类。
 - @Binds：告知 Dagger 接口应采用哪种实现。
 
-
-（1）@Provider
 
 假如此时有一个"用户登录的需求"，登录的参数需要在LoginPresenter构造中传入：
 
@@ -361,7 +356,180 @@ class NetWorkModules {
 
 这样就完美跑起来了。
 
-（2）@Binds
+###### 3、Module相关@Binds
+
+首先看个例子，为MainActivity添加HomePresent来控制Home上的主要业务逻辑，简单模拟下：
+
+```kotlin
+/**
+ * Create by SunnyDay /07/13 21:09:54
+ */
+interface HomePresenter {
+    fun logOut()
+}
+
+class HomePresenterImpl :HomePresenter {
+    override fun logOut() {
+        println("logout")
+    }
+}
+```
+
+然后MainActivity我们作为字段使用：
+
+```kotlin
+class MainActivity : AppCompatActivity() {
+    companion object{
+        const val tag = "MainActivity"
+    }
+    @Inject
+    lateinit var loginPresent:LoginPresenter
+    
+    //HomePresenterImpl cannot be provided without an @Inject constructor or an @Provides-annotated method.
+    @Inject
+    lateinit var homePresenter:HomePresenterImpl
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        (application as MyApplication).appComponent.inject(this)
+        setContentView(R.layout.activity_main)
+        loginPresent.login()
+        // 使用对象
+        homePresenter.logOut()
+    }
+}
+```
+如上，直接编译会报错需要给HomePresenterImpl类构造添加@Inject注解或者使用@Provides方式提供对象。
+
+先不修改呢，其实在上述的基础上我们还能模拟出另一个bug：
+
+```kotlin
+    //HomePresenter cannot be provided without an @Provides-annotated method.
+    @Inject
+    lateinit var homePresenter:HomePresenter
+```
+可见使用接口（HomePresenter）时提示只能使用@Provides方式提供对象了，这里我们可以留意下这种细节。
+
+此时我们好像对Dagger容器管理的对象有了一点收获： Dagger容器管理的对象或者管理的注入字段，提供实例的方式都一般有两种方式一种是目标类构造使用@Inject
+注解，另外一种就是使用@Providers注解提供实例。
+
+好了就按照@Provides方式进行修改：
+
+```kotlin
+/**
+ * Create by SunnyDay /07/13 21:43:19
+ */
+@Module
+class HomeModule {
+    @Provides
+    fun providerHomePresenter():HomePresenter{
+        return HomePresenterImpl()
+    }
+}
+```
+
+向容器注册下：
+
+```kotlin
+@Component(modules = [NetWorkModules::class,HomeModule::class])
+interface ApplicationComponent {
+
+    fun getUserRepository():UserRepository
+
+    fun inject(activity:MainActivity)
+}
+```
+这样mainActivity中的homePresenter就有值了。
+
+其实上述只是简单的模拟，打个log，想要更加贴切我们再深入模拟：
+
+```kotlin
+/**
+ * Create by SunnyDay /07/13 21:11:45
+ */
+class HomePresenterImpl constructor(private val userService: ApiService) :HomePresenter {
+    override fun logOut() {
+        userService.logOutFromSever().enqueue(object : Callback<ResponseBody> {
+            override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
+                Log.i("HomePresenterImpl", "onResponse")
+            }
+
+            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                Log.i("HomePresenterImpl", "onFailure")
+            }
+        })
+    }
+}
+```
+给HomePresenterImpl构造添加一个参数。此时有了先前的经验我们知道这时要做两步：
+（1）给HomePresenterImpl构造添加@Inject注解。由于此时我们HomePresenterImpl已经通过@Providers方式提供了所以这步不用做了。
+
+（2）通过@Provider提供个ApiService。这个我们前面举例子举过，这里稍作修改。
+
+```kotlin
+@Module
+class HomeModule {
+    /**
+     * 思考：
+     * 
+     * 1、HomePresenterImpl需要参数的，我们这里只能通过方法提供。因此给providerHomePresenter添加参数这种方式我们就熟了，
+     * 前面添加OkhttpClient参数做过。因此仿照即可。
+     * 2、ApiService貌似之前NetWorkModule创建过。NetWorkModule与HomeModule都归我们的ApplicationComponent管理，因此
+     * 已经有的实力这里不用写重新创建了，dagger容器会自动找到NetWorkModule中提供的。
+     */
+    @Provides
+    fun providerHomePresenter(api: ApiService):HomePresenter{
+        return HomePresenterImpl(api)
+    }
+}
+```
+emmmm，跑一下真的跑起来了。
+
+这里或许会产生个疑问，如下，MainActivity中定义的这个字段类型是LoginPresenter类型，接口的实现类可能有很多Dagger是如何区分的？？？
+```kotlin
+    @Inject
+    lateinit var loginPresent:LoginPresenter
+```
+
+如下稍微模拟
+```kotlin
+@Module
+class HomeModule {
+    @Provides
+    fun providerHomePresenter(api: ApiService):HomePresenter{
+        val result = HomePresenterImpl(api)
+        println("HomeModule:result1")
+        return result
+    }
+
+    @Provides
+    fun providerHomePresenter1(api: ApiService,s:String):HomePresenter{
+        val result2 = HomePresenterImpl(api)
+        println("HomeModule:result2")
+        return result2
+    }
+
+    @Provides
+    fun providerString():String{
+        return "s"
+    }
+
+}
+```
+运行直接回出现编译提示：HomePresenter is bound multiple times。可以看到MainActivity中的HomePresenter字段被注入多次这是
+不允许的。
+
+倘若我们把providerHomePresenter1改为providerHomePresenter回如何？还是会报错的：Cannot have more than one binding method with the same name in a single module
+这又是Dagger的规定，一个Module中只能有一个唯一的函数名。
+
+注意上述的两个方法的返回值都是HomePresenter类型，而MainActivity中定义的字段类型也是。这也是Dagger的规定，Dagger是根据类的类型去找
+给自己提供实例的方法的，不用管方法名、方法参数之类的。
+
+todo 使用@Binds解决
+
+
+
+
 
 
 
