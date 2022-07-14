@@ -462,6 +462,7 @@ class HomePresenterImpl constructor(private val userService: ApiService) :HomePr
 }
 ```
 给HomePresenterImpl构造添加一个参数。此时有了先前的经验我们知道这时要做两步：
+
 （1）给HomePresenterImpl构造添加@Inject注解。由于此时我们HomePresenterImpl已经通过@Providers方式提供了所以这步不用做了。
 
 （2）通过@Provider提供个ApiService。这个我们前面举例子举过，这里稍作修改。
@@ -525,7 +526,158 @@ class HomeModule {
 注意上述的两个方法的返回值都是HomePresenter类型，而MainActivity中定义的字段类型也是。这也是Dagger的规定，Dagger是根据类的类型去找
 给自己提供实例的方法的，不用管方法名、方法参数之类的。
 
-todo 使用@Binds解决
+
+经过一番尝试，又了解了很多东西，接下来回归正题，看看@Binds的使用场景吧！如何使用@Binds来替换@Providers。
+
+梳理下之前的代码把：首先看下使用，HomePresenter字段为Dagger容器注入的。
+
+```kotlin
+class MainActivity : AppCompatActivity() {
+    companion object{
+        const val tag = "MainActivity"
+    }
+    @Inject
+    lateinit var loginPresent:LoginPresenter
+
+    //字段
+    @Inject
+    lateinit var homePresenter:HomePresenter
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        // 注入
+        (application as MyApplication).appComponent.inject(this)
+        setContentView(R.layout.activity_main)
+        loginPresent.login()
+        // 使用字段。
+        homePresenter.logOut()
+    }
+}
+```
+Dagger容器中做了啥：
+
+```kotlin
+@Component(modules = [NetWorkModules::class,HomeModule::class])
+interface ApplicationComponent {
+    
+    fun inject(activity:MainActivity)
+    
+}
+```
+
+```kotlin
+@Module
+class NetWorkModules {
+    /**
+     * 提供Retrofit实例
+     * */
+    @Provides
+    fun provideLoginRetrofitService(client: OkHttpClient): ApiService {
+        return Retrofit.Builder()
+            .baseUrl("https://www.baidu.com")
+            .client(client)
+            .build()
+            .create(ApiService::class.java)
+
+    }
+
+    @Provides
+    fun providerOkhttpClient():OkHttpClient{
+        return OkHttpClient()
+        // return OkHttpClient.Builder().build() // 这样也可
+    }
+}
+```
+
+```kotlin
+
+@Module
+class HomeModule {
+    @Provides
+    fun providerHomePresenter(api: ApiService): HomePresenter {
+        return HomePresenterImpl(api)
+    }
+
+}
+```
+
+可见Dagger容器管理着字段的注入。然后管理了两个Module。
+
+最后就是HomePresenterImpl实现类了
+
+```kotlin
+
+interface HomePresenter {
+    fun logOut()
+}
+
+class HomePresenterImpl constructor(private val userService: ApiService) :HomePresenter {
+    override fun logOut() {
+           userService.logOutFromSever().enqueue(object : Callback<ResponseBody> {
+               override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
+                   Log.i("HomePresenterImpl", "onResponse")
+               }
+
+               override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                   Log.i("HomePresenterImpl", "onFailure")
+               }
+           })
+    }
+}
+
+```
+
+如上HomePresenterImpl构造添加了一个ApiService后，我们额外在NetWorkModules中定义了一个方法来提供ApiService的实例。要使用@Binds
+该如何改写呢？如下：
+
+```kotlin
+@Module
+abstract class HomeModule {
+//    二者共存时：错误: A @Module may not contain both non-static and abstract binding methods
+//    @Provides
+//    fun providerHomePresenter(api: ApiService): HomePresenter {
+//        return HomePresenterImpl(api)
+//    }
+    @Binds
+    abstract fun bindHomePresenter(homePresenterImp: HomePresenterImpl): HomePresenter
+}
+```
+
+- 抽象方法不需要我们自己实现
+- 返回值类型定义为需要的类型
+- 参数为类型的实现类
+
+
+```kotlin
+class HomePresenterImpl @Inject constructor(private val userService: ApiService) :HomePresenter {
+    override fun logOut() {
+           userService.logOutFromSever().enqueue(object : Callback<ResponseBody> {
+               override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
+                   Log.i("HomePresenterImpl", "onResponse")
+               }
+
+               override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                   Log.i("HomePresenterImpl", "onFailure")
+               }
+           })
+    }
+}
+```
+目标类上加注解，表示受Dagger容器管理。
+
+接下来一一张形象的图来描绘下二者的对比：
+
+![Login自动注入](https://gitee.com/sunnnydaydev/my-pictures/raw/master/github/di/binds.png)
+
+可见@Binds和@providers是有区别的：
+
+@Providers 需要自己提供方法，自己提供实例。
+
+@Binds     需要定义方法，然后方法参数传递个实现类，实现类需要使用@Inject注解。
+
+
+
+
 
 
 
