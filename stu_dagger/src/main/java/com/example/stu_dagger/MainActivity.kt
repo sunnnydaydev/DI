@@ -13,7 +13,7 @@ class MainActivity : AppCompatActivity() {
     @Inject
     lateinit var loginPresent:LoginPresenter
 
-    //HomePresenterImpl cannot be provided without an @Inject constructor or an @Provides-annotated method.
+
     @Inject
     lateinit var homePresenter:HomePresenter
 
