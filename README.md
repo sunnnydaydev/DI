@@ -10,13 +10,6 @@
 
 [5、Dagger子组件.md](./mds/5、Dagger子组件.md)
 
-[6、Dagger作用于总结.md](./mds/6、Dagger作用于总结.md)
+[6、Dagger模块总结.md](./mds/6、Dagger模块总结.md)
 
-
-
-todo： 登录案例：手动依赖注入下面重新整理
-
-2、登录案例：Dagger实现
-
-3、Dagger在多模块中使用
 
