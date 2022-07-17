@@ -2,6 +2,7 @@ package com.example.stu_dagger.presenter
 
 import android.app.Dialog
 import android.util.Log
+import com.example.stu_dagger.anno.ActivityScope
 import com.example.stu_dagger.beans.User
 import com.example.stu_dagger.service.ApiService
 import okhttp3.ResponseBody
@@ -13,6 +14,7 @@ import javax.inject.Inject
 /**
  * Create by SunnyDay /07/13 21:11:45
  */
+@ActivityScope
 class HomePresenterImpl @Inject constructor(private val userService: ApiService) :HomePresenter {
     override fun logOut() {
            userService.logOutFromSever().enqueue(object : Callback<ResponseBody> {

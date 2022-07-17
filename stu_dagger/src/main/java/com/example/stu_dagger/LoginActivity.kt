@@ -19,6 +19,6 @@ class LoginActivity : AppCompatActivity() {
         val loginComponent = application.appComponent.getLoginComponent().create()
         loginComponent.inject(this)
         setContentView(R.layout.activity_injecct_field)
-         loginPresent.login()
+        loginPresent.login()
     }
 }

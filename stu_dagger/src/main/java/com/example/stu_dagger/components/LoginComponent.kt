@@ -1,11 +1,13 @@
 package com.example.stu_dagger.components
 
 import com.example.stu_dagger.LoginActivity
+import com.example.stu_dagger.anno.ActivityScope
 import dagger.Subcomponent
 
 /**
  * Create by SunnyDay /07/16 17:57:08
  */
+@ActivityScope
 @Subcomponent
 interface LoginComponent {
     fun inject(activity:LoginActivity)

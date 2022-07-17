@@ -91,7 +91,134 @@ class LoginActivity : AppCompatActivity() {
 }
 ```
 
-###### 2、子组件&组件生命周期
+###### 2、组件生命周期再次理解
+
+容器管理着对象依赖关系图，若是不希望每次创建某对象，可以把对象的生命周期限定为容器的生命周期即可。具体做法也很简单主要分为两步，
+首先给容器添加@Singleton注解（也可以使用自定义注解），其次就是目标类也进行标记即可。这点我们已经在Dagger基础中有所了解。
+
+其实我们可以使用任何自定义注解在容器中指定某个类的唯一实例，只要该容器和类带有该注解即可。@Singleton 属于 Dagger 库默认提供的。
+
+
+这里先对目前我们了解的组件生命周期使用做下总结：
+
+- 使用构造函数注入（通过 @Inject）时，应在类中添加作用域注解
+- 使用 Dagger 模块时，应在 @Provides 方法中添加作用域注解
+
+
+```kotlin
+@Singleton
+@Component
+interface ApplicationComponent {
+    fun getUserRepository():UserRepository
+}
+
+@Singleton
+class UserRepository @Inject constructor(
+    val localDataSource: UserLocalDataSource,
+    val remoteDataSource: UserRemoteDataSource
+)
+```
+
+```kotlin
+@Singleton
+@Component(modules = [NetworkModule::class])
+interface ApplicationComponent {
+    fun inject(activity: LoginActivity)
+}
+
+@Singleton
+class UserRepository @Inject constructor(
+    private val localDataSource: UserLocalDataSource,
+    private val remoteDataSource: UserRemoteDataSource // 类构造中持有LoginRetrofitService实例。
+) 
+
+@Module
+class NetworkModule {
+    @Singleton
+    @Provides
+    fun provideLoginRetrofitService(): LoginRetrofitService 
+}
+```
+
+###### 3、子组件生命周期
+
+有了上面的子组件改写后，我们来进行下简单的分析：
+
+LoginComponent是在 Activity 的 onCreate() 方法中创建的，将随着 Activity 的销毁而被隐式销毁。
+
+每次请求时，LoginComponent 必须始终提供 LoginVPresenter 的同一实例。您可以通过创建自定义注释作用域并使用该作用域为 LoginComponent添加注解确保这一点。
+请注意，不可使用 @Singleton 注释，因为该注释已被父组件使用，您需要创建不同的注释作用域。
+
+为啥不能使用@Singleton 注释呢？Dagger对作用于有限定规则的：
+
+- 如果某个类型标记有作用域注解，该类型就只能由带有相同作用域注解的组件使用。
+- 如果某个组件标记有作用域注解，该组件就只能提供带有该注解的类型或不带注解的类型。
+- 子组件不能使用其某一父组件使用的作用域注解。
+
+因此我们需要为子组件定义新的作用域注解：
+
+```kotlin
+/**
+ * Create by SunnyDay /07/17 21:09:29
+ */
+@Scope
+@Retention(value = AnnotationRetention.RUNTIME)
+annotation class ActivityScope
+```
+
+子组件中的某些对象限定为单例直接按照父组件的用法即可：
+
+```kotlin
+@ActivityScope
+@Subcomponent
+interface LoginComponent {
+    fun inject(activity:LoginActivity)
+
+    // 提供创建子容器对象的接口，这样父容器知道如何创建子容器对象。
+    @Subcomponent.Factory
+    interface Factory{
+        fun create():LoginComponent
+    }
+}
+```
+```kotlin
+@ActivityScope
+class HomePresenterImpl @Inject constructor(private val userService: ApiService) :HomePresenter {
+    override fun logOut() {
+           userService.logOutFromSever().enqueue(object : Callback<ResponseBody> {
+               override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
+                   Log.i("HomePresenterImpl", "onResponse")
+               }
+
+               override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                   Log.i("HomePresenterImpl", "onFailure")
+               }
+           })
+    }
+}
+```
+
+可见很简单HomePresenterImpl受Subcomponent管理，而且是构造型因此直接给类加个和容器相同的注解即可。
+
+假如LoginActivity有两个Fragment都需要同一个loginPresenter实例，这时就可以这样做：
+
+```kotlin
+@ActivityScope
+@Subcomponent
+interface LoginComponent {
+    fun inject(activity:LoginActivity)
+
+    // 提供创建子容器对象的接口，这样父容器知道如何创建子容器对象。
+    @Subcomponent.Factory
+    interface Factory{
+        fun create():LoginComponent
+    }
+    fun inject(usernameFragment: LoginUsernameFragment)
+    fun inject(passwordFragment: LoginPasswordFragment)
+}
+```
+然后对应的LoginUsernameFragment中定义个loginPresenter字段注入下即可。这样这两个fragment与我们的LoginActivity这三处使用的都是同一个
+实例。
 
 
 
