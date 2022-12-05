@@ -9,12 +9,9 @@ import javax.inject.Singleton
 /**
  * Create by SunnyDay 2022/07/01 10:59:10
  */
-@MakeSingleTon
+
 class UserRepository @Inject constructor(
-    val localDataSource: UserLocalDataSource,
-    val remoteDataSource: UserRemoteDataSource
+    val localDataSource: UserLocalDataSource
 )
 
-class UserLocalDataSource @Inject constructor() {}
-
-class UserRemoteDataSource @Inject constructor() {}
+class UserLocalDataSource @Inject constructor()
