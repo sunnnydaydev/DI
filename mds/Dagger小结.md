@@ -153,7 +153,7 @@ class DaggerBasicActivity : AppCompatActivity() {
 }
 ```
 
-只需要使用容器就能很方便管理对象，不用手写啦~  再说手写谁还用Dagger直接new多块呢！看下生成的源码 ->
+只需要使用容器就能很方便管理对象，不用手写啦~  再说手写谁还用Dagger直接new多快呢！看下生成的源码 ->
 
 ```java
 //1、实现我们定义的容器接口
@@ -279,6 +279,7 @@ public final class DaggerApplicationComponent implements ApplicationComponent {
 
   @SuppressWarnings("unchecked")
   private void initialize() {
+    // 等号右面就是Provider<UserRepository>实现类，这个实现类通过DoubleCheck工具类处理，每次get都是同一个实例。
     this.userRepositoryProvider = DoubleCheck.provider(UserRepository_Factory.create(UserLocalDataSource_Factory.create()));
   }
 
@@ -358,8 +359,10 @@ public final class DaggerApplicationComponent implements ApplicationComponent {
 }
 ```
 
-通过两个栗子可知，添加作用域标签标明类后，这个类的单例在生成容器实现类中就生成了，其他生成类的源代码不会收到影响。此时我们可以大胆预言，假如目标类与依赖项都标注
-作用域标签，生成的容器实现类中应该有两个成员Provider< 目标类 >，Provider< 依赖项 > ,源码就不给出了，可自行查看验证下~
+通过两个栗子可知，添加作用域标签标明类后，这个类的单例在生成容器实现类时就生成了，其他生成类的源代码不会收到影响。此时我们可以大胆预言，假如目标类与依赖项都标注
+作用域标签，生成的容器实现类中应该有两个成员Provider< 目标类 >和Provider< 依赖项 > ,源码就不给出了，可自行查看验证下~
+
+总结，容器中存在多少单例对象，在容器生成类中就会有多少个Provider< 单例注解类 >类型的成员变量。
 
 ###### 6、自定义作用域
 
@@ -369,6 +372,7 @@ public final class DaggerApplicationComponent implements ApplicationComponent {
 @Documented
 @Retention(RUNTIME)
 public @interface Singleton {}
+
 //@Scope源码 ->
 @Target(ANNOTATION_TYPE)
 @Retention(RUNTIME)
@@ -392,8 +396,153 @@ interface ApplicationComponent {
 }
 ```
 
-# Factory与Provider
+###### 7、@Inject注解字段
 
+这个可实现类似ButterKnife的效果，直接上使用,给Activity注入一个presenter字段~
+
+```kotlin
+@Component
+interface ApplicationComponent {
+     //定义个注入方法，表示往DaggerBasicActivity注入字段
+     fun inject(activity: DaggerBasicActivity)
+}
+```
+```kotlin
+//注入字段所属的实体类型
+class LoginPresenter @Inject constructor()
+```
+
+```kotlin
+class DaggerBasicActivity : AppCompatActivity() {
+    @Inject
+    lateinit var loginPresenter: LoginPresenter
+    
+    override fun onCreate(savedInstanceState: Bundle?) {
+        val daggerContainer = (application as MyApplication).getDaggerContainer()
+        super.onCreate(savedInstanceState)
+        //字段注入
+        daggerContainer.inject(this)
+        setContentView(R.layout.activity_dagger_basic)
+        println("使用字段：$loginPresenter")
+        //System.out: 使用字段：com.example.di.dagger_basic.repository.LoginPresenter@4bb080e
+    }
+}
+```
+需要留意几点
+
+字段不能是private类型的否则报错Dagger does not support injection into private fields
+
+有多个类要注入字段时，不能共用同一个注入方法，也即方法中的类型不能是基类，要是具体的类型，否则注入字段失败，如：
+```kotlin
+@Component
+interface ApplicationComponent {
+     fun inject(activity: Activity)
+}
+// 心想：修改参数为Activity这样所有的activity都能用这个方法进行字段注入了，大错特错，这样会注入失败：上线栗子改成这样会报错：
+//kotlin.UninitializedPropertyAccessException: lateinit property loginPresenter has not been initialized
+//可见注入未成功，延迟初始化的属性也未得到赋值，而报错。
+```
+
+字段注入的背后原理？？？
+
+首先看LoginPresenter的工厂生成类，这个最简单，经过前面的探究我们想必已经知道了这个LoginPresenter工厂类的代码结构，一个newInsta方法，一个create-get方法：
+
+```java
+public final class LoginPresenter_Factory implements Factory<LoginPresenter> {
+  @Override
+  public LoginPresenter get() {
+    return newInstance();
+  }
+
+  public static LoginPresenter_Factory create() {
+    return InstanceHolder.INSTANCE;
+  }
+
+  public static LoginPresenter newInstance() {
+    return new LoginPresenter();
+  }
+
+  private static final class InstanceHolder {
+    private static final LoginPresenter_Factory INSTANCE = new LoginPresenter_Factory();
+  }
+}
+```
+
+这里没啥看的，看下容器的生成代码->
+
+```java
+public final class DaggerApplicationComponent implements ApplicationComponent {
+  private final DaggerApplicationComponent applicationComponent = this;
+
+  private DaggerApplicationComponent() {}
+
+  public static Builder builder() {
+    return new Builder();
+  }
+
+  public static ApplicationComponent create() {
+    return new Builder().build();
+  }
+  
+  @Override
+  public void inject(DaggerBasicActivity activity) {
+    injectDaggerBasicActivity(activity);
+  }
+  // 核心之处：可以看到这里的方法名，调用类名的命名很有规律的。
+  private DaggerBasicActivity injectDaggerBasicActivity(DaggerBasicActivity instance) {
+    DaggerBasicActivity_MembersInjector.injectLoginPresenter(instance, new LoginPresenter());
+    return instance;
+  }
+
+  public static final class Builder {
+    private Builder() {
+    }
+
+    public ApplicationComponent build() {
+      return new DaggerApplicationComponent();
+    }
+  }
+}
+```
+容器的实现类代码我们也是非常熟悉了，这里也没啥大差别。在接口实现类中实现接口方法，方法内调用了DaggerBasicActivity_MembersInjector#injectLoginPresenter
+那么DaggerBasicActivity_MembersInjector这个类是怎样来的呢？？？
+
+其实Dagger在编译器会扫描@Inject注解，当发现某个activity的字段使用了@Inject注解时，会自动生成一个XXXActivity_MembersInjector类。这点我们可以手动去除字段
+上的注解来验证，去除后Dagger不会生成XXXActivity_MembersInjector类。看下源码：
+
+```java
+public final class DaggerBasicActivity_MembersInjector implements MembersInjector<DaggerBasicActivity> {
+  // 2、至于为啥LoginPresenter的构造也要加注解，目前未搞清楚，我猜大概是可能会用到吧？？？
+  private final Provider<LoginPresenter> loginPresenterProvider;
+
+  public DaggerBasicActivity_MembersInjector(Provider<LoginPresenter> loginPresenterProvider) {
+    this.loginPresenterProvider = loginPresenterProvider;
+  }
+
+  public static MembersInjector<DaggerBasicActivity> create(
+      Provider<LoginPresenter> loginPresenterProvider) {
+    return new DaggerBasicActivity_MembersInjector(loginPresenterProvider);
+  }
+
+  @Override
+  public void injectMembers(DaggerBasicActivity instance) {
+    injectLoginPresenter(instance, loginPresenterProvider.get());
+  }
+  
+  @InjectedFieldSignature("com.example.di.dagger_basic.DaggerBasicActivity.loginPresenter")
+  public static void injectLoginPresenter(DaggerBasicActivity instance, LoginPresenter loginPresenter) {
+        //1、容器中调用注入方法时会走到这里。这里会给指定的activity的字段赋值。
+        instance.loginPresenter = loginPresenter;
+        // 知道为啥Dagger操作的字段不能是私有的了吧，因为这里就是普通的对象赋值，而不是通过反射操作的。
+  }
+}
+```
+
+总结：当我们在activity中调用容器的注入方法时，这时会把activity的实例传递过去，然后在Dagger容器中自动生成或根据已有工厂类获取字段的实例，自动赋值。
+
+收获：不能够通过构造注入的字段我们可使用Inject方式注入，这种其实就是setter注入。
+
+# Factory Provider Lazy
 
 
 
