@@ -222,7 +222,6 @@ class DaggerBasicActivity : AppCompatActivity() {
 
 todo 整理
 
-
 [参考](https://developer.android.google.cn/training/dependency-injection/dagger-basics)
 
 
