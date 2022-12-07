@@ -148,16 +148,18 @@ class DaggerBasicActivity : AppCompatActivity() {
     }
 }
 ```
-//对比时间可知Lazy延迟初始化了
+
 2022-12-07 22:33:27.083  I/System.out: test-UserLocalDataSource Init
 
 2022-12-07 22:33:32.093  I/System.out: test-localDataSource1:com.example.di.dagger_basic.repository.UserLocalDataSource@587680d
 2022-12-07 22:33:32.093  I/System.out: test-localDataSource2:com.example.di.dagger_basic.repository.UserLocalDataSource@587680d
 
 2022-12-07 22:33:32.093  I/System.out: test-Seat Init
-//Lazy 方式创建的对象每次获取的都是同个。这点与直接注入一样
 
 2022-12-07 22:33:32.093  I/System.out: test-seat1:com.example.di.dagger_basic.test.Seat@36973c2
 2022-12-07 22:33:32.093  I/System.out: test-seat2:com.example.di.dagger_basic.test.Seat@36973c2
+
+- 对比时间可知Lazy延迟初始化了
+- Lazy 方式创建的对象每次获取的都是同个。这点与直接注入一样。
 
 ###### 3、Factory
