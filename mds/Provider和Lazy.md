@@ -77,9 +77,13 @@ class DaggerBasicActivity : AppCompatActivity() {
 
 2022-12-07 21:46:56.835 I/System.out: test-localDataSource1:com.example.di.dagger_basic.repository.UserLocalDataSource@587680d
 2022-12-07 21:46:56.835 I/System.out: test-localDataSource2:com.example.di.dagger_basic.repository.UserLocalDataSource@587680d
+
 2022-12-07 21:46:56.835 I/System.out: test-Seat Init
+
 2022-12-07 21:46:56.836 I/System.out: test-seat1:com.example.di.dagger_basic.test.Seat@36973c2
+
 2022-12-07 21:46:56.836 I/System.out: test-Seat Init
+
 2022-12-07 21:46:56.836 I/System.out: test-seat2:com.example.di.dagger_basic.test.Seat@f3795d3
 
 - 对比localDataSource1 localDataSource2 和seat1 seat2的值可发现直接注入的每次获取到的实例相同，通过Provider< T >注入的每次获取的实例不同。
@@ -149,8 +153,10 @@ class DaggerBasicActivity : AppCompatActivity() {
 
 2022-12-07 22:33:32.093  I/System.out: test-localDataSource1:com.example.di.dagger_basic.repository.UserLocalDataSource@587680d
 2022-12-07 22:33:32.093  I/System.out: test-localDataSource2:com.example.di.dagger_basic.repository.UserLocalDataSource@587680d
+
 2022-12-07 22:33:32.093  I/System.out: test-Seat Init
 //Lazy 方式创建的对象每次获取的都是同个。这点与直接注入一样
+
 2022-12-07 22:33:32.093  I/System.out: test-seat1:com.example.di.dagger_basic.test.Seat@36973c2
 2022-12-07 22:33:32.093  I/System.out: test-seat2:com.example.di.dagger_basic.test.Seat@36973c2
 
