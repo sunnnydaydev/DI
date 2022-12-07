@@ -73,21 +73,17 @@ class DaggerBasicActivity : AppCompatActivity() {
 }
 ```
 
-2022-12-07 21:46:51.825 I/System.out: test-UserLocalDataSource Init
+- 2022-12-07 21:46:51.825 I/System.out: test-UserLocalDataSource Init
+- 2022-12-07 21:46:56.835 I/System.out: test-localDataSource1:com.example.di.dagger_basic.repository.UserLocalDataSource@587680d
+- 2022-12-07 21:46:56.835 I/System.out: test-localDataSource2:com.example.di.dagger_basic.repository.UserLocalDataSource@587680d
+- 2022-12-07 21:46:56.835 I/System.out: test-Seat Init
+- 2022-12-07 21:46:56.836 I/System.out: test-seat1:com.example.di.dagger_basic.test.Seat@36973c2
+- 2022-12-07 21:46:56.836 I/System.out: test-Seat Init
+- 2022-12-07 21:46:56.836 I/System.out: test-seat2:com.example.di.dagger_basic.test.Seat@f3795d3
 
-2022-12-07 21:46:56.835 I/System.out: test-localDataSource1:com.example.di.dagger_basic.repository.UserLocalDataSource@587680d
-2022-12-07 21:46:56.835 I/System.out: test-localDataSource2:com.example.di.dagger_basic.repository.UserLocalDataSource@587680d
+对比localDataSource1 localDataSource2 和seat1 seat2的值可发现直接注入的每次获取到的实例相同，通过Provider< T >注入的每次获取的实例不同。
 
-2022-12-07 21:46:56.835 I/System.out: test-Seat Init
-
-2022-12-07 21:46:56.836 I/System.out: test-seat1:com.example.di.dagger_basic.test.Seat@36973c2
-
-2022-12-07 21:46:56.836 I/System.out: test-Seat Init
-
-2022-12-07 21:46:56.836 I/System.out: test-seat2:com.example.di.dagger_basic.test.Seat@f3795d3
-
-- 对比localDataSource1 localDataSource2 和seat1 seat2的值可发现直接注入的每次获取到的实例相同，通过Provider< T >注入的每次获取的实例不同。
-- 对比UserLocalDataSource初始化时间可知Provider< T >注入方式是惰性初始化T对象的，对象T在使用时才初始化。
+对比UserLocalDataSource初始化时间可知Provider< T >注入方式是惰性初始化T对象的，对象T在使用时才初始化。
 
 源码验证下实例的获取区别 ->
 
@@ -149,17 +145,15 @@ class DaggerBasicActivity : AppCompatActivity() {
 }
 ```
 
-2022-12-07 22:33:27.083  I/System.out: test-UserLocalDataSource Init
+- 2022-12-07 22:33:27.083  I/System.out: test-UserLocalDataSource Init
+- 2022-12-07 22:33:32.093  I/System.out: test-localDataSource1:com.example.di.dagger_basic.repository.UserLocalDataSource@587680d
+- 2022-12-07 22:33:32.093  I/System.out: test-localDataSource2:com.example.di.dagger_basic.repository.UserLocalDataSource@587680d
+- 2022-12-07 22:33:32.093  I/System.out: test-Seat Init
+- 2022-12-07 22:33:32.093  I/System.out: test-seat1:com.example.di.dagger_basic.test.Seat@36973c2
+- 2022-12-07 22:33:32.093  I/System.out: test-seat2:com.example.di.dagger_basic.test.Seat@36973c2
 
-2022-12-07 22:33:32.093  I/System.out: test-localDataSource1:com.example.di.dagger_basic.repository.UserLocalDataSource@587680d
-2022-12-07 22:33:32.093  I/System.out: test-localDataSource2:com.example.di.dagger_basic.repository.UserLocalDataSource@587680d
+对比时间可知Lazy延迟初始化了
 
-2022-12-07 22:33:32.093  I/System.out: test-Seat Init
-
-2022-12-07 22:33:32.093  I/System.out: test-seat1:com.example.di.dagger_basic.test.Seat@36973c2
-2022-12-07 22:33:32.093  I/System.out: test-seat2:com.example.di.dagger_basic.test.Seat@36973c2
-
-- 对比时间可知Lazy延迟初始化了
-- Lazy 方式创建的对象每次获取的都是同个。这点与直接注入一样。
+Lazy方式创建的对象每次获取的都是同个。这点与直接注入一样。
 
 ###### 3、Factory
