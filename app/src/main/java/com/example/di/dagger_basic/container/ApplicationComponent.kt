@@ -1,7 +1,6 @@
 package com.example.di.dagger_basic.container
 
 
-import com.example.di.dagger_basic.repository.UserRepository
 import dagger.Component
 
 /**
@@ -9,5 +8,5 @@ import dagger.Component
  */
 @Component
 interface ApplicationComponent {
-     fun repository(): UserRepository
+     fun  getViewModelFactory()
 }
