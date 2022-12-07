@@ -14,4 +14,8 @@ class UserRepository @Inject constructor(
     val localDataSource: UserLocalDataSource
 )
 
-class UserLocalDataSource @Inject constructor()
+class UserLocalDataSource @Inject constructor(){
+    init {
+        println("test-UserLocalDataSource Init")
+    }
+}

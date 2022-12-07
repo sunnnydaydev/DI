@@ -12,5 +12,12 @@
 
 [6、Dagger模块总结.md](./mds/6、Dagger模块总结.md)
 
-[7、Dagger小结.md](./mds/Dagger小结.md)
+# 小结
+
+[@inject.md](./mds/@inject.md)
+
+[Provider和Lazy.md](./mds/Provider和Lazy.md)
+
+
+[参考](https://developer.android.google.cn/training/dependency-injection/dagger-basics)
 

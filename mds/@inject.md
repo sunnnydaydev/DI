@@ -541,13 +541,3 @@ public final class DaggerBasicActivity_MembersInjector implements MembersInjecto
 总结：当我们在activity中调用容器的注入方法时，这时会把activity的实例传递过去，然后在Dagger容器中自动生成或根据已有工厂类获取字段的实例，自动赋值。
 
 收获：不能够通过构造注入的字段我们可使用Inject方式注入，这种其实就是setter注入。
-
-# Factory Provider Lazy
-
-
-[参考](https://developer.android.google.cn/training/dependency-injection/dagger-basics)
-
-
-
-
-
