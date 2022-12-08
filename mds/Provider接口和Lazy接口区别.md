@@ -1,7 +1,7 @@
 
 # Provider 和Lazy
 
-直接注入，Factory方式，Provider方式，Lazy方式的区别~
+直接注入方式，Provider方式，Lazy方式的区别~
 
 ###### 1、Provider
 
@@ -154,10 +154,7 @@ log：
 2022-12-07 22:33:32.093  I/System.out: test-seat2:com.example.di.dagger_basic.test.Seat@36973c2
 ```
 
-
-
 对比时间可知Lazy延迟初始化了
 
 Lazy方式创建的对象每次获取的都是同个。这点与直接注入一样。
 
-###### 3、Factory

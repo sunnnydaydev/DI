@@ -18,15 +18,7 @@ class DaggerBasicActivity : AppCompatActivity() {
         setContentView(R.layout.activity_dagger_basic)
 
         val daggerContainer = (application as MyApplication).getDaggerContainer()
-        val repo = daggerContainer.getUserRepository()
-        val car = daggerContainer.getCar()
-
-        lifecycleScope.launch (Dispatchers.IO){
-            delay(5000)
-            println("test-localDataSource1:${repo.localDataSource}")
-            println("test-localDataSource2:${repo.localDataSource}")
-            println("test-seat1:${car.seatProvider.get()}")
-            println("test-seat2:${car.seatProvider.get()}")
-        }
+        val present= daggerContainer.getLoginPresent()
+        present.login()
     }
 }

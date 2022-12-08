@@ -14,9 +14,11 @@
 
 # 小结
 
-[@inject.md](./mds/@inject.md)
+[Inject注解.md](./mds/Inject注解.md)
 
-[Provider和Lazy.md](./mds/Provider和Lazy.md)
+[Provider接口和Lazy接口.md](./mds/Provider接口和Lazy接口区别.md)
+
+[Provider注解与Binds注解](./mds/Provider注解与Binds注解.md)
 
 
 [参考](https://developer.android.google.cn/training/dependency-injection/dagger-basics)
