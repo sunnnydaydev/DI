@@ -22,5 +22,7 @@
 
 [Subcomponent注解](./mds/Subcomponent注解.md)
 
+[其他用法](./mds/其他用法.md)
+
 [参考](https://developer.android.google.cn/training/dependency-injection/dagger-basics)
 
