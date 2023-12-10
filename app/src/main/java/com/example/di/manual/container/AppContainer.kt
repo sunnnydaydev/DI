@@ -4,7 +4,6 @@ import com.example.di.manual.repository.UserLocalDataSource
 import com.example.di.manual.repository.UserRemoteDataSource
 import com.example.di.manual.repository.UserRepository
 import com.example.di.manual.service.LoginService
-import com.example.di.manual.viewmodel.LoginViewModelFactory
 import retrofit2.Retrofit
 
 /**

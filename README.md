@@ -12,6 +12,8 @@
 
 [6、Dagger模块总结.md](./mds/6、Dagger模块总结.md)
 
+[7、Dagger在Gradle多模块中的使用.md](./mds/Dagger在多模块中的使用.md)
+
 # 小结
 
 [Inject注解.md](./mds/Inject注解.md)

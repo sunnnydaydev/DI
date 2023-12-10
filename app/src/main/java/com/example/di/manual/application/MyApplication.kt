@@ -2,7 +2,6 @@ package com.example.di.manual.application
 
 import android.app.Application
 import com.example.di.dagger_basic.container.ApplicationComponent
-import com.example.di.dagger_basic.container.DaggerApplicationComponent
 import com.example.di.manual.container.AppContainer
 
 /**

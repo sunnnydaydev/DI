@@ -16,3 +16,5 @@ rootProject.name = "DI"
 include ':app'
 include ':auto_di'
 include ':stu_dagger'
+include ':mulmodule'
+include ':LoginModule'
