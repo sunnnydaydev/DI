@@ -375,7 +375,7 @@ annotation class MyCustomScope
 
 接下来看一张图来理解下Dagger容器
 
-![](![Login自动注入](https://gitee.com/sunnnydaydev/my-pictures/raw/master/github/di/DaggerContainer.png))
+![Login自动注入](https://gitee.com/sunnnydaydev/my-pictures/raw/master/github/di/DaggerContainer.png)
 
 
 
