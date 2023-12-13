@@ -1,6 +1,6 @@
-# 依赖注入
+# DI
 
-[1、依赖注入概览.md](./mds/1、依赖注入概览.md)
+[1、依赖注入.md](./mds/1、依赖注入概览.md)
 
 [2、登录栗子手动依赖项注入.md](./mds/2、登录栗子手动依赖项注入.md)
 
@@ -26,5 +26,7 @@
 
 [其他用法](./mds/其他用法.md)
 
-[参考](https://developer.android.google.cn/training/dependency-injection/dagger-basics)
+# 参考
+
+[官方文档](https://developer.android.google.cn/training/dependency-injection/dagger-basics)
 
