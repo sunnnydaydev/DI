@@ -371,6 +371,12 @@ annotation class MyCustomScope
 定义十分简单：核心是系统的@Scope注解，使用这个注解标记我们自定义注解即可。
 使用也很简单：给容器组件添加这个注解，然后给容器直接或者间接管理的目标类添加这个注解即可。
 
+# 总结
+
+接下来看一张图来理解下Dagger容器
+
+![](![Login自动注入](https://gitee.com/sunnnydaydev/my-pictures/raw/master/github/di/DaggerContainer.png))
+
 
 
 
