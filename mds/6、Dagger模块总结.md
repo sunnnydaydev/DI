@@ -67,5 +67,4 @@ class Module1
 class Module2
 ```
 
-###### 2、在多模块中使用Dagger
 
