@@ -278,7 +278,7 @@ public final class DaggerApplicationComponent implements ApplicationComponent {
 - 接口中定义的方法获取相应对象时方式改变了，使用了单例模式的DCL方案。
 - 添加@Singleton注解后与未添加注解时生成的目标类代码一致。单例的处理是在容器类中处理的。
 
-去除UserRepository的@Singleton，给UserRemoteDataSource添加@Singleton,看下面的变化点可印证: "单例的处理是在容器类中处理的"
+去除UserRepository的@Singleton，给UserRemoteDataSource添加@Singleton,看下面源码的变化点可印证: "单例的处理是在容器类中处理的"
 
 ```java
 @DaggerGenerated
@@ -328,7 +328,7 @@ public final class DaggerApplicationComponent implements ApplicationComponent {
 }
 ```
 
-相同UserRepository对象的userRemoteDataSource属性多次获取是单例的。我们来验证下这个
+相同UserRepository对象的userRemoteDataSource属性多次获取是单例的。我们以🌰验证下这个：
 
 ```kotlin
         val container = (application as MyApplication).getContainer()
