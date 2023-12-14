@@ -109,6 +109,8 @@ public final class DaggerAppComponent {
      * */
     private MainActivity injectMainActivity2(MainActivity instance) {
       MainActivity_MembersInjector.injectVm(instance, new MainViewModel());
+      // 注意若是activity中有多个字段需要注入这里就会有对应的injectXXX方法,传递对应的类实例。猜想Dagger是通过@Inject注解标识
+      // 了activity的所有字段，然后在这里一一注入  
       return instance;
     }
   }

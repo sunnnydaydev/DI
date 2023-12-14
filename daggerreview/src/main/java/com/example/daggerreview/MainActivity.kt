@@ -3,15 +3,19 @@ package com.example.daggerreview
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import com.example.daggerreview.entity.UserRepository
 import com.example.daggerreview.vm.MainViewModel
 import javax.inject.Inject
-import javax.security.auth.login.LoginException
 
 class MainActivity : AppCompatActivity() {
     private val container: AppComponent by lazy { (application as MyApplication).getContainer() }
 
     @Inject
     lateinit var vm: MainViewModel
+
+    @Inject
+    lateinit var repos:UserRepository
+
     override fun onCreate(savedInstanceState: Bundle?) {
         container.injectMainActivity(this)
         super.onCreate(savedInstanceState)
