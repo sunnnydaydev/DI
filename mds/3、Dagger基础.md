@@ -278,7 +278,7 @@ public final class DaggerApplicationComponent implements ApplicationComponent {
 - 接口中定义的方法获取相应对象时方式改变了，使用了单例模式的DCL方案。
 - 添加@Singleton注解后与未添加注解时生成的目标类代码一致。单例的处理是在容器类中处理的。
 
-去除UserRepository的@Singleton，给 UserRemoteDataSource添加@Singleton,看下面的变化点可印证："添加@Singleton注解后与未添加注解时生成的目标类代码一致。单例的处理是在容器类中处理的。"
+去除UserRepository的@Singleton，给UserRemoteDataSource添加@Singleton,看下面的变化点可印证: "单例的处理是在容器类中处理的"
 
 ```java
 @DaggerGenerated
@@ -308,6 +308,7 @@ public final class DaggerApplicationComponent implements ApplicationComponent {
     @SuppressWarnings("unchecked")
     private void initialize() {
         // 变化点
+        // 此时我们会发现：相同UserRepository对象的userRemoteDataSource属性多次获取是单例的。
         this.userRemoteDataSourceProvider = DoubleCheck.provider(UserRemoteDataSource_Factory.create());
     }
 
@@ -327,8 +328,28 @@ public final class DaggerApplicationComponent implements ApplicationComponent {
 }
 ```
 
-注意📢单例也是建立在Dagger容器的管理下的。使用容器管理后我们不要随便创建相应的对象了，否则就打破单例了。
+相同UserRepository对象的userRemoteDataSource属性多次获取是单例的。我们来验证下这个
 
+```kotlin
+        val container = (application as MyApplication).getContainer()
+        val repo1 = container.getUserRepository()
+        val repo2 = container.getUserRepository()
+        
+        val userRemoteDataSource1 = repo1.userRemoteDataSource
+        val userRemoteDataSource2 = repo1.userRemoteDataSource
+        val userRemoteDataSource3 = repo2.userRemoteDataSource
+
+        // userRemoteDataSource1 userRemoteDataSource2相同的repo
+        Log.d("My test", "userRemoteDataSource1:${userRemoteDataSource1}")
+        Log.d("My test", "userRemoteDataSource2:${userRemoteDataSource2}")
+        Log.d("My test", "userRemoteDataSource3:${userRemoteDataSource3}")
+        //userRemoteDataSource1:com.example.daggerreview.entity.UserRemoteDataSource@7b12f1f
+        //userRemoteDataSource2:com.example.daggerreview.entity.UserRemoteDataSource@7b12f1f
+        //userRemoteDataSource3:com.example.daggerreview.entity.UserRemoteDataSource@3c6b26c
+```
+
+
+注意📢单例也是建立在Dagger容器的管理下的。使用容器管理后我们不要随便创建相应的对象了，否则就打破单例了。
 
 上面的例子我们或许也发现了@Singleton注解并不会使容器本身单例，那么我们如何使容器单例呢？通常我们首先想到的就是采用单例模式，但这里有一种更加
 快捷方便的方法，结合Application：
