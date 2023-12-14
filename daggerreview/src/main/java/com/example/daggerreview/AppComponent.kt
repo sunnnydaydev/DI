@@ -10,6 +10,8 @@ import javax.inject.Singleton
 
 @Component
 @Singleton
-interface AppComponent{
-  fun getUserRepository():UserRepository
+interface AppComponent {
+    fun getUserRepository(): UserRepository
+
+    fun injectMainActivity(activity: MainActivity)
 }
