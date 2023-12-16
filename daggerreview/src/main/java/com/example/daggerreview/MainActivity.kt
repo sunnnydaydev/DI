@@ -5,6 +5,10 @@ import android.os.Bundle
 import android.util.Log
 import com.example.daggerreview.entity.UserRepository
 import com.example.daggerreview.vm.MainViewModel
+import okhttp3.ResponseBody
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import javax.inject.Inject
 
 class MainActivity : AppCompatActivity() {
@@ -14,15 +18,15 @@ class MainActivity : AppCompatActivity() {
     lateinit var vm: MainViewModel
 
     @Inject
-    lateinit var repos:UserRepository
+    lateinit var repos: UserRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         container.injectMainActivity(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        Log.d("My test", "viewModel:${vm}")
-        //viewModel:com.example.daggerreview.vm.MainViewModel@7b12f1f
+        vm.getSeverData()
     }
+
 
     fun test1() {
         val repo1 = container.getUserRepository()

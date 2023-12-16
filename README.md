@@ -8,7 +8,7 @@
 
 [4、Dagger的setter注入.md](./mds/4、Dagger的setter注入.md)
 
-[5、Dagger子组件.md](./mds/5、Dagger子组件.md)
+[5、Dagger子组件.md](./mds/Dagger子组件.md)
 
 [6、Dagger模块总结.md](./mds/6、Dagger模块总结.md)
 

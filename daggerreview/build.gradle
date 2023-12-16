@@ -43,4 +43,6 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
     implementation 'com.google.dagger:dagger:2.45'
     kapt 'com.google.dagger:dagger-compiler:2.44'
+    implementation "com.squareup.okhttp3:okhttp:4.9.3"//okHttp
+    implementation 'com.squareup.retrofit2:retrofit:2.5.0'//retrofit
 }
