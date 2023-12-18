@@ -12,19 +12,23 @@
 
 [6、Dagger模块总结.md](./mds/6、Dagger模块总结.md)
 
-[7、Dagger在Gradle多模块中的使用.md](./mds/Dagger在多模块中的使用.md)
+[7、Subcomponent注解.md](./mds/7、Subcomponent注解.md)
 
-# 小结
+[8、Dagger在多模块中的使用.md](./mds/8、Dagger在多模块中的使用.md)
 
-[Inject注解.md](./mds/Inject注解.md)
+[9、Provider接口和Lazy接口区别.md](./mds/9、Provider接口和Lazy接口区别.md)
 
-[Provider接口和Lazy接口.md](./mds/Provider接口和Lazy接口区别.md)
+[10、其他用法.md](./mds/10、其他用法.md)
 
-[Provider注解与Binds注解](./mds/Provider注解与Binds注解.md)
 
-[Subcomponent注解](./mds/Subcomponent注解.md)
+todo 
 
-[其他用法](./mds/其他用法.md)
+###### app Component 如何管理其他容器？
+必须以子组件形式吗？
+
+###### 2、子组件的生命周期
+
+这个要多写几个栗子练习下
 
 # 参考
 
