@@ -30,6 +30,9 @@ todo
 
 这个要多写几个栗子练习下
 
+###### 3、还未接触到的注解持续总结
+如@BindInstance
+
 # 参考
 
 [官方文档](https://developer.android.google.cn/training/dependency-injection/dagger-basics)
