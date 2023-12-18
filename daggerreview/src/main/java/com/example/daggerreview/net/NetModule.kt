@@ -1,6 +1,7 @@
 package com.example.daggerreview.net
 
-import com.example.daggerreview.entity.UserRepository
+import com.example.base_lib.entity.Man
+import com.example.base_lib.entity.Person
 import dagger.Module
 import dagger.Provides
 import okhttp3.OkHttpClient
@@ -23,7 +24,4 @@ class NetModule {
 
     @Provides
     fun providerOkHttpClient():OkHttpClient = OkHttpClient.Builder().build()
-
-    @Provides
-    fun providerTest(repository: UserRepository) = repository
 }

@@ -1,4 +1,6 @@
-# Dagger子组件
+# Dagger Module
+
+注意这里的Module指的是Dagger容器管理的Module，而非gradle 多模块~
 
 ###### 1、Dagger module总结
 

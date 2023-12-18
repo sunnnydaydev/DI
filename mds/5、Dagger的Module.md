@@ -163,15 +163,135 @@ data class UserRepository @Inject constructor(val userRemoteDataSource: UserRemo
 
 接着我们还能更大胆的想下假如我有个BaseLib gradle模块，app 工程依赖这个模块，这里有个Module也受Dagger容器管理,那么Dagger容器管理对象还能互相调用吗？
 
-测试下
+```kotlin
+//1、base_lib gradle module 定义
+package com.example.base_lib.entity
+import javax.inject.Inject
+/**
+ * Create by SunnyDay /12/18 21:19:14
+ */
+class User @Inject constructor()
+```
 
-todo 
+```kotlin
+class MainActivity : AppCompatActivity() {
+    private val container: AppComponent by lazy { (application as MyApplication).getContainer() }
 
-创建 gradle Module
+    @Inject
+    lateinit var user: User
 
-测试对象之间依赖，
+    override fun onCreate(savedInstanceState: Bundle?) {
+        container.injectMainActivity(this)
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+        // 2、app 模块使用
+        Log.d("my test","user hash code-> $user")
+        //user hash code-> com.example.base_lib.entity.User@1c3e317
+    }
 
-猜想：gradle模块可能存在依赖反转现象，dagger是可行的
+}
+```
+
+# @Binds
+
+我们在base_lib 定义如下entity
+
+```kotlin
+interface Person
+class User @Inject constructor()
+class Man:Person
+```
+
+然后这样使用：
+
+```kotlin
+class MainActivity : AppCompatActivity() {
+    private val container: AppComponent by lazy { (application as MyApplication).getContainer() }
+    
+    @Inject
+    lateinit var person: Person
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        container.injectMainActivity(this)
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+        vm.getSeverData()
+
+        Log.d("my test","person hash code-> $person")
+    }
+    
+}
+```
+
+Person cannot be provided without an @Provides-annotated method.
+
+编译直接报错了，按照提示我们需要以@Provides方式提供，我们按照这种方式试试
+
+```kotlin
+@Module
+class NetModule {
+
+    @Provides
+    fun providerApiService(client:OkHttpClient): ApiService =
+        Retrofit.Builder()
+            .baseUrl("https://www.baidu.com")
+            .client(client)
+            .build()
+            .create(ApiService::class.java)
+
+    @Provides
+    fun providerOkHttpClient():OkHttpClient = OkHttpClient.Builder().build()
+
+    /**
+     * 1、返回值类型定义为接口类型Person（重点）
+     * 2、返回值给一个实现类。
+     * */
+    @Provides
+    fun providerPerson():Person = Man()
+}
+```
+
+除了这种方式还有其他的方式吗？答案是有的看看@Binds怎样实现的
+
+```kotlin
+@Module
+interface PersonModule {
+    @Binds
+    fun bindManModule(man: Man):Person
+}
+```
+
+```kotlin
+interface Person
+class User @Inject constructor()
+class Man @Inject constructor():Person
+```
+
+- 这里定义了一个接口
+- 接口内部使用@Binds标记接口方法
+- 方法的返回值类型为目标基类类型
+- 方法的参数为具体的实现类（注意方法的参数也要提供实例，这里会自动寻找class Man @Inject constructor():Person）
+
+然后Module指定为容器管理
+
+```kotlin
+@Component(modules = [NetModule::class,PersonModule::class])
+@Singleton
+interface AppComponent {
+    fun getUserRepository(): UserRepository
+
+    fun injectMainActivity(activity: MainActivity)
+}
+```
+
+这样再次run一下就会发现跑起来了~
+
+
+
+
+
+
+
 
 
 
