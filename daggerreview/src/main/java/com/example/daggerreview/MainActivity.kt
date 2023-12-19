@@ -1,11 +1,13 @@
 package com.example.daggerreview
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import com.example.base_lib.entity.Person
 import com.example.base_lib.entity.User
 import com.example.daggerreview.entity.UserRepository
+import com.example.daggerreview.login.UserInfo
 import com.example.daggerreview.vm.MainViewModel
 import okhttp3.ResponseBody
 import retrofit2.Call
@@ -28,14 +30,21 @@ class MainActivity : AppCompatActivity() {
     @Inject
     lateinit var person: Person
 
+    @Inject
+    lateinit var userInfo: UserInfo
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         container.injectMainActivity(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         vm.getSeverData()
 
-        Log.d("my test","user hash code-> $person")
+        Log.d("my test", "user hash code-> $person")
         //user hash code-> com.example.base_lib.entity.User@1c3e317
+        Log.d("my-test", "userInfo main activity:${userInfo}")
+
+        startActivity(Intent(this, LoginActivity::class.java))
     }
 
 
