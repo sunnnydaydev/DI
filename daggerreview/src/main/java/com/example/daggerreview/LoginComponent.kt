@@ -12,7 +12,6 @@ import javax.inject.Singleton
  * Create by SunnyDay /12/19 21:20:10
  */
 
-@Singleton
 @Subcomponent
 interface LoginComponent {
     fun inject(activity: LoginActivity)

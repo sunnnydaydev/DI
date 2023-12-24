@@ -20,19 +20,6 @@
 
 [10、其他用法.md](./mds/10、其他用法.md)
 
-
-todo 
-
-###### app Component 如何管理其他容器？
-必须以子组件形式吗？
-
-###### 2、子组件的生命周期
-
-这个要多写几个栗子练习下
-
-###### 3、还未接触到的注解持续总结
-如@BindInstance
-
 # 参考
 
 [官方文档](https://developer.android.google.cn/training/dependency-injection/dagger-basics)

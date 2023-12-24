@@ -135,10 +135,7 @@ interface ProviderLoginComponent {
 @Component(modules = [ProviderModule::class])
 interface AppContainer{
     fun injectMainActivity(mainActivity: MainActivity)
-
-    // 1、去除modules = [ProviderModule::class]
-    // 2、fun getLoginContainer(): LoginContainer = DaggerLoginContainer.create()
-    // 这种做法行不通
+    
     fun getLoginContainer(): LoginContainer
 }
 ```
@@ -152,6 +149,7 @@ class MyApplication : Application(),ProviderLoginContainer {
     }
 
     fun getAppComponent () = container
+    
     override fun providerLoginContainer(): LoginContainer = container.getLoginContainer()
 }
 ```
@@ -176,15 +174,8 @@ class LoginActivity : AppCompatActivity() {
 }
 ```
 
-疑问
-
-- 为啥上面这种方式不行？
-
-```kotlin
-// 1、去除modules = [ProviderModule::class]
-// 2、fun getLoginContainer(): LoginContainer = DaggerLoginContainer.create()
-// 这种做法行不通
-```
+很简单实用接口做了解耦，而loginContainer对象的获取来自具体的接口实现类MyApplication#ProviderLoginContainer这里。ProviderLoginContainer具体是通过AppContainer中定义的接口获取的，此时
+Dagger会找到ProviderModule来提供对象。
 
 
 - 官方文档这里的具体实现细节？
@@ -194,24 +185,10 @@ loginComponent = (applicationContext as MyDaggerApplication)
                         .appComponent.loginComponent().create()
 ```
 
-使用了Build模式？ 如下方式我未跑起来
-
-```kotlin
-@Component
-interface LoginContainer {
-    fun getUser():User
-
-    fun  injectLoginActivity(loginActivity: LoginActivity)
-
-    @Component.Builder
-    interface Builder {
-        fun build(): LoginContainer
-    }
-
-}
-```
+这里有一个小细节[官方文档](https://developer.android.google.cn/training/dependency-injection/dagger-multi-module?hl=zh-cn)中使用Dagger子容器方式实现的。我心里突发奇想使用Dagger容器实现了下~
+具体大家可看下官方实现。
 
 总结：
 
-感觉上述方式通过接口解决了模块之间无法引用问题，但不如直接在Login module创建LoginContainer看着简单
+感觉多模块就是在两容器之间添加了接口来解决多模块之间不能直接交流的情况~ 这里也加深了对接口的了解。
 
