@@ -9,9 +9,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         val container = (application as MyApplication).getContainer()
-        Log.d("My-test","cat:${container.getCat()}")
-        Log.d("My-test","Animal:${container.getAnimal()}")
-        //D  cat:com.example.otherusage.entity.Cat@7b12f1f
-        //D  Animal:com.example.otherusage.entity.Dog@3c6b26c
+        Log.d("My-test","application:${container.application()}")
+        //application:com.example.otherusage.MyApplication@17f1035
     }
 }

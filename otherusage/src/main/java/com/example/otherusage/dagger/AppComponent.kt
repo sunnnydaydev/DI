@@ -1,7 +1,9 @@
 package com.example.otherusage.dagger
 
+import android.app.Application
 import com.example.otherusage.entity.Animal
 import com.example.otherusage.entity.Cat
+import dagger.BindsInstance
 import dagger.Component
 
 /**
@@ -13,4 +15,11 @@ interface AppComponent {
     fun getAnimal(): Animal
 
     fun getCat(): Cat
+
+    fun application():Application
+
+    @Component.Factory
+    interface Factory{
+        fun create(@BindsInstance application: Application):AppComponent
+    }
 }
