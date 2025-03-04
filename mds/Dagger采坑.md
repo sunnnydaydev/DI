@@ -1,4 +1,6 @@
-# app/build.gradle文件
+# 一、Unsupported metadata version. Check that your Kotlin version is >= 1.0
+
+###### app/build.gradle文件
 
 ```kotlin
 plugins {
@@ -53,9 +55,26 @@ dependencies {
 }
 ```
 
-# 报错
+###### 报错
 
-build通过，run不起来，log如下
+引入dagger依赖后进行如下注解添加-> build还能编译通过
+```kotlin
+class UserRepository @Inject constructor(
+    val localDataSource: UserLocalDataSource,
+    val remoteDataSource: UserRemoteDataSource
+)
+class UserLocalDataSource @Inject constructor()
+class UserRemoteDataSource @Inject constructor()
+```
+
+然后添加容器注解后build通过，run不起来：
+
+```kotlin
+@Component
+interface ApplicationComponent {
+    fun getUserRepository(): UserRepository
+}
+```
 
 ```kotlin
 
@@ -73,7 +92,7 @@ Caused by: java.lang.IllegalStateException: Unsupported metadata version. Check 
 
 ```
 
-# 解决
+###### 解决
 
 看最后一个Caused by 获取到点信息。这里没按照提示去改，更新到如下版本顺利run起来了
 
