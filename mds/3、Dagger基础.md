@@ -46,24 +46,27 @@ class UserRepository(
 /**
  * Create by SunnyDay /07/06 21:28:16
  */
+class UserLocalDataSource @Inject constructor()
 class UserRemoteDataSource @Inject constructor()
+
+class UserRepository @Inject constructor(
+    val localDataSource: UserLocalDataSource,
+    val remoteDataSource: UserRemoteDataSource
+)
+
 ```
 UserRemoteDataSource与UserLocalDataSource类似都是一个类，无任何字段成员，这里就选取一个看下效果。
 
 注解后点击Idea->Build->Make Project这是编译器就会自动生成代码，代码在app/build/generated/source/kapt/debug/package下
 
 ```java
-@DaggerGenerated
-@SuppressWarnings({
-    "unchecked",
-    "rawtypes"
-})
 public final class UserRemoteDataSource_Factory implements Factory<UserRemoteDataSource> {
   //方式1：Factory接口提供的get方法获取
   @Override
   public UserRemoteDataSource get() {
     return newInstance();
   }
+  // 提供create方法来创建自身对象
   public static UserRemoteDataSource_Factory create() {
     return InstanceHolder.INSTANCE;
   }
@@ -77,26 +80,77 @@ public final class UserRemoteDataSource_Factory implements Factory<UserRemoteDat
   }
 }
 ```
+
+```java
+public interface Factory<T> extends Provider<T> { }
+public interface Provider<T> {
+    T get();
+}
+```
+
 可见，仅仅加了一个注解后Dagger帮助我们自动生成了代码。观看自动生成的代码我们会发现一些信息：
 
-- 生成类为工厂类，类名有规则：被生成类名_Factory。 且生成类实现Factory<被生成类>接口
-- 生成类提供了两种方式创建被生成类实例，默认非单例实现。
+- Dagger会为目标类生成工厂类，工厂类命名有规则(目标类名_Factory)。 工厂类实现Factory<目标类>接口
+- Factory是Dagger库提供的一个接口,其继承Provider接口，Provider接口中定义了get方法。
+- 工厂类提供了两种方式创建目标类实例（get、newInstance，生成的对象非单例）
+- 工厂类提供create方法来创建自身对象（生成的对象非单例）
 
+
+好了，我们来看看UserRepository的生成类吧：
+
+```java
+public final class UserRepository_Factory implements Factory<UserRepository> {
+  private final Provider<UserLocalDataSource> localDataSourceProvider;
+
+  private final Provider<UserRemoteDataSource> remoteDataSourceProvider;
+
+  public UserRepository_Factory(Provider<UserLocalDataSource> localDataSourceProvider,
+      Provider<UserRemoteDataSource> remoteDataSourceProvider) {
+    this.localDataSourceProvider = localDataSourceProvider;
+    this.remoteDataSourceProvider = remoteDataSourceProvider;
+  }
+
+  @Override
+  public UserRepository get() {
+    return newInstance(localDataSourceProvider.get(), remoteDataSourceProvider.get());
+  }
+
+  public static UserRepository_Factory create(Provider<UserLocalDataSource> localDataSourceProvider,
+      Provider<UserRemoteDataSource> remoteDataSourceProvider) {
+    return new UserRepository_Factory(localDataSourceProvider, remoteDataSourceProvider);
+  }
+
+  public static UserRepository newInstance(UserLocalDataSource localDataSource,
+      UserRemoteDataSource remoteDataSource) {
+    return new UserRepository(localDataSource, remoteDataSource);
+  }
+}
+
+```
+
+看过UserRemoteDataSource的工厂类后这里就很容易理解了：
+
+- 同样也是生成一个工厂类，实现Factory接口。
+- 目标类通过构造函数注入对对象，这里就通过构造函数注入目标类的工厂类对象
+- 同样通过两种方式提供目标类的实例（get、newInstance）
+- 同样通过create方法获取自身的工厂类实例
 
 ###### 2、通过容器管理依赖项
 
-给构造函数添加@Inject注解之后Dagger确实为我们生成了对象，此时我想获取
+给构造函数添加@Inject注解之后Dagger便为我们生成了对象，此时我想获取UserRepository对象该如何办呢？通过上述的源码我们知道我们有如下方式
 
-但是这个对象的创建还是需要我们手动去做的，这样不还是挺繁琐的吗？试想一下假如我给UserRepository类的
-构造也添加了注解，我创建UserRepository对象的同时还要为其构造传参真是太鸡肋了，还不如不用dagger呢，我直接new几次就完事了。
+- 通过工厂类的静态方法newInstance
+- 通过工厂类的方法get
 
-真的繁琐吗？此时Dagger的容器管理就发挥作用了。创建容器管理依赖：
+这两种方法都需要我们手写一些代码，其实针对无参数的对象来说还好些，如上的UserRepository就繁琐了，还要我们手写依赖项对象的创建。
+
+这对我们来说好像挺繁琐的，接下来看看如何通过容器管理来简化这个操作的,容器的创建很简单，定义个接口，然后使用@Component注解标注下即可:
+
 ```kotlin
 @Component
-interface ApplicationComponent {
-}
+interface ApplicationComponent {}
 ```
-容器的创建很简单，定义个接口，然后使用@Component注解标注下即可。 接下来看看如何使用容器来管理依赖的：
+接下来看看如何使用容器来管理依赖的：
 
 ```kotlin
 @Component
@@ -109,23 +163,15 @@ interface ApplicationComponent {
 ```kotlin
         // 获取UserRepository实例
         val userRepository:UserRepository = DaggerApplicationComponent.create().getUserRepository()
-        // 获取UserRepository的依赖项
-            userRepository.localDataSource
-            userRepository.remoteDataSource
 ```
 
 - DaggerApplicationComponent是ApplicationComponent接口的实现类。这也是系统生成的，并且系统提供了如何获取DaggerApplicationComponent实例的方法
 - 生成类的名字也是有规律的：Dagger+接口名
 - 生成类采取Build模式获取
 
-这看起来貌似简单多啦😁  我们可看下容器实现类的具体就看源码：
+这看起来貌似简单多啦😁我们可看下容器实现类的具体就看源码：
 
 ```java
-@DaggerGenerated
-@SuppressWarnings({
-    "unchecked",
-    "rawtypes"
-})
 public final class DaggerApplicationComponent implements ApplicationComponent {
   private final DaggerApplicationComponent applicationComponent = this;
 
@@ -160,8 +206,9 @@ public final class DaggerApplicationComponent implements ApplicationComponent {
 
 - 通过Build模式来创建容器对象。因此直接DaggerApplicationComponent#create 或者 DaggerApplicationComponent#Builder#builder都能获取到容器对象。
 - 容器实现了接口的方法，并且通过new方式提供对象
-- 不过容器管理的对象默认情况下非单例的，默认情况下被管理的对象都是new出来的。 容器本身也是非单例的。Build模式创建，一看就知道。
+- 容器管理的对象默认情况下非单例的，默认情况下被管理的对象都是new出来的。 容器本身也是非单例的。Build模式创建，一看就知道。
 
+// todo 探究下这里为啥直接new对象，而非通过工厂类创建。
 
 # Dagger容器内对象的单例
 

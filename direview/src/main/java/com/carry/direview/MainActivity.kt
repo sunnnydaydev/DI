@@ -5,6 +5,10 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.carry.direview.entity.UserLocalDataSource_Factory
+import com.carry.direview.entity.UserRemoteDataSource
+import com.carry.direview.entity.UserRemoteDataSource_Factory
+import com.carry.direview.entity.UserRepository_Factory
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
