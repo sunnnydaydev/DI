@@ -1,4 +1,6 @@
-# 一、Unsupported metadata version. Check that your Kotlin version is >= 1.0
+# 一、Unsupported metadata version.
+
+Unsupported metadata version. Check that your Kotlin version is >= 1.0
 
 ###### app/build.gradle文件
 
