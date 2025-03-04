@@ -17,24 +17,23 @@
 ```
 ###### 2、要使用的类
 
-![Login自动注入](https://gitee.com/sunnnydaydev/my-pictures/raw/master/github/di/userrepo.png)
-
 - UserRepository
 - UserLocalDataSource
 - UserRemoteDataSource
 
-本文主要以这三个类为🌰 三者可构成依赖关系，UserRepository依赖UserLocalDataSource和UserRemoteDataSource，代码表示如下：
+本文主要以这三个类为例子，三者存咋依赖关系：UserRepository依赖UserLocalDataSource和UserRemoteDataSource，代码表示如下：
 
 ```kotlin
 /**
  * Create by SunnyDay /07/06 21:26:32
  */
+class UserLocalDataSource
+class UserRemoteDataSource
+
 class UserRepository(
      val localDataSource: UserLocalDataSource,
      val remoteDataSource: UserRemoteDataSource
 )
-class UserLocalDataSource
-class UserRemoteDataSource
 ```
 
 # 使用Dagger进行自动依赖注入
@@ -60,7 +59,7 @@ UserRemoteDataSource与UserLocalDataSource类似都是一个类，无任何字�
     "rawtypes"
 })
 public final class UserRemoteDataSource_Factory implements Factory<UserRemoteDataSource> {
-  //方式2：生成类对象.get()获取
+  //方式1：Factory接口提供的get方法获取
   @Override
   public UserRemoteDataSource get() {
     return newInstance();
@@ -68,7 +67,7 @@ public final class UserRemoteDataSource_Factory implements Factory<UserRemoteDat
   public static UserRemoteDataSource_Factory create() {
     return InstanceHolder.INSTANCE;
   }
-  //方式1：静态调用，直接获取被生成类实例。
+  //方式2：静态newInstance方法调用，直接获取被生成类实例。
   public static UserRemoteDataSource newInstance() {
     return new UserRemoteDataSource();
   }
@@ -80,31 +79,18 @@ public final class UserRemoteDataSource_Factory implements Factory<UserRemoteDat
 ```
 可见，仅仅加了一个注解后Dagger帮助我们自动生成了代码。观看自动生成的代码我们会发现一些信息：
 
-- 生成类为工厂类，类名有规则：被生成类名_Factory
-- 生成类提供了两种方式创建被生成类实例。
-- 默认情况下被生成类实例非单例。
+- 生成类为工厂类，类名有规则：被生成类名_Factory。 且生成类实现Factory<被生成类>接口
+- 生成类提供了两种方式创建被生成类实例，默认非单例实现。
 
-```kotlin
-        // 两种方式获取被生成类对象
-        val userRemoteDataSource1:UserRemoteDataSource = UserRemoteDataSource_Factory.newInstance()
-        val userRemoteDataSource2:UserRemoteDataSource  = UserRemoteDataSource_Factory.create().get()
-        Log.d(tag,"userRemoteDataSource1:$userRemoteDataSource1")
-        Log.d(tag,"userRemoteDataSource2:$userRemoteDataSource2")
-        /**
-           log:
-           D/MainActivity: userRemoteDataSource1:com.example.stu_dagger.repo.UserRemoteDataSource@67f5a77
-           D/MainActivity: userRemoteDataSource2:com.example.stu_dagger.repo.UserRemoteDataSource@d3f6e4
-         */
-```
 
 ###### 2、通过容器管理依赖项
 
-给构造函数添加@Inject注解之后Dagger确实为我们生成了对象，但是这个对象的创建还是需要我们手动去做的，这样不还是挺繁琐的吗？试想一下假如我给UserRepository类的
+给构造函数添加@Inject注解之后Dagger确实为我们生成了对象，此时我想获取
+
+但是这个对象的创建还是需要我们手动去做的，这样不还是挺繁琐的吗？试想一下假如我给UserRepository类的
 构造也添加了注解，我创建UserRepository对象的同时还要为其构造传参真是太鸡肋了，还不如不用dagger呢，我直接new几次就完事了。
 
-真的繁琐吗？此时Dagger的容器管理就发挥作用了
-
-创建容器管理依赖
+真的繁琐吗？此时Dagger的容器管理就发挥作用了。创建容器管理依赖：
 ```kotlin
 @Component
 interface ApplicationComponent {
@@ -155,8 +141,7 @@ public final class DaggerApplicationComponent implements ApplicationComponent {
   public static ApplicationComponent create() {
     return new Builder().build();
   }
-
-  // 接口实现方法，并且自动实现。每次调用都会new对象。
+  
   @Override
   public UserRepository getUserRepository() {
     return new UserRepository(new UserLocalDataSource(), new UserRemoteDataSource());
@@ -173,11 +158,9 @@ public final class DaggerApplicationComponent implements ApplicationComponent {
 }
 ```
 
-- 通过Build模式来创建生成类实例。因此直接DaggerApplicationComponent#create 或者 DaggerApplicationComponent#Builder#builder都能获取到生成类对象。
-- 生成类中自动生成接口实现方法。
-- 很好理解容器就是管理具有依赖关系的对象创建的，只要吧具有依赖关系的对象放入容器中容器就自动管理。
-- 不过容器管理的对象默认情况下非单例的，默认情况下被管理的对象都是new出来的。
-- 容器本身也是非单例的。Build模式创建，一看就知道。
+- 通过Build模式来创建容器对象。因此直接DaggerApplicationComponent#create 或者 DaggerApplicationComponent#Builder#builder都能获取到容器对象。
+- 容器实现了接口的方法，并且通过new方式提供对象
+- 不过容器管理的对象默认情况下非单例的，默认情况下被管理的对象都是new出来的。 容器本身也是非单例的。Build模式创建，一看就知道。
 
 
 # Dagger容器内对象的单例
