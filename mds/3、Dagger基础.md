@@ -208,11 +208,12 @@ public final class DaggerApplicationComponent implements ApplicationComponent {
 - 容器实现了接口的方法，并且通过new方式提供对象
 - 容器管理的对象默认情况下非单例的，默认情况下被管理的对象都是new出来的。 容器本身也是非单例的。Build模式创建，一看就知道。
 
-// todo 探究下这里为啥直接new对象，而非通过工厂类创建。
 
 # Dagger容器内对象的单例
 
-容器管理的对象默认情况下是非单例的，想要让提供的对象单例可以使用@Singleton注解
+容器管理的对象默认情况下是非单例的，想要让容器管理的对象单例可以使用@Singleton注解。如何去做呢？我们只需做到两步：
+
+###### 1、给容器添加@Singleton
 
 ```kotlin
 @Singleton
@@ -220,13 +221,20 @@ public final class DaggerApplicationComponent implements ApplicationComponent {
 interface ApplicationComponent {
     fun getUserRepository():UserRepository
 }
+```
 
+###### 2、给容器管理的对象添加@Singleton
+
+```kotlin
 @Singleton
 class UserRepository @Inject constructor(
     val localDataSource: UserLocalDataSource,
     val remoteDataSource: UserRemoteDataSource
 )
 ```
+
+好了，这样 容器管理的对象就是单例的了。
+
 代码验证：
 
 ```kotlin
