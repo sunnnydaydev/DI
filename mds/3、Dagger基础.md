@@ -299,28 +299,21 @@ class MyApplication :Application() {
 }
 ```
 
-# 自定义容器内对象的生命周期
+# 自定义作用域标签
 
-@Singleton 是Dagger为我们提供的作用域注解， 我们使用作用域注解可将某个对象的生命周期限定为其组件的生命周期。
-
-这意味着只要组件在生命周期内是单例的，被作用于注解标记的对象在组件范围内单例。
-
-如上的@Singleton是系统提供的注解，当然我们也可以创建并使用自定义作用域注解
+@Singleton 是Dagger默认提供的作用域标签，这个标签的设计初衷是将某个对象的生命周期限定为整个应用的生命周期内。当我们期望某个对象的生命周期为Activity的生命周期内、Fragment生命周期内
+该如何做呢？这时就需要自定义作用域标签了，如何自定义呢？很简单使用Dagger提供的@Scope标签即可：
 
 ```kotlin
 @Scope
 @MustBeDocumented
 @Retention(value = AnnotationRetention.RUNTIME)
-annotation class MyCustomScope
+annotation class ActivityScope
 ```
-定义十分简单：核心是系统的@Scope注解，使用这个注解标记我们自定义注解即可。
-使用也很简单：给容器组件添加这个注解，然后给容器直接或者间接管理的目标类添加这个注解即可。
+- 核心是Dagger提供的@Scope注解，使用这个注解标记我们自定义的注解即可。
+- 使用也很简单与@Singleton一样，给容器组件添加这个注解，然后给容器直接或者间接管理的目标类添加这个注解即可。
 
-# 总结
 
-接下来看一张图来理解下Dagger容器
-
-![Login自动注入](https://gitee.com/sunnnydaydev/my-pictures/raw/master/github/di/DaggerContainer.png)
 
 
 
